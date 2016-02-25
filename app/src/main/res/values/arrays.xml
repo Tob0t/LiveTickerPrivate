@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sport_types">
+        <item>Beachvolleyball</item>
+        <item>Badminton</item>
+        <item>Volleyball</item>
+    </string-array>
+    <string-array name="game_states">
+        <item>Game in future</item>
+        <item>Game in progress</item>
+        <item>Game finished</item>
+    </string-array>
+</resources>

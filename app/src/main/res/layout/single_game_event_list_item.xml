@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@android:color/white"
+        android:descendantFocusability="blocksDescendants"
+        android:foreground="?selectableItemBackground"
+        android:paddingLeft="@dimen/margin_small"
+        android:paddingStart="@dimen/margin_small"
+        android:orientation="vertical"
+        android:baselineAligned="false"
+        android:paddingRight="@dimen/margin_small"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:id="@+id/text_view_points_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/points_event"
+            android:textColor="@color/black"
+            android:textSize="@dimen/points_event"
+            android:layout_marginLeft="4dp"
+            android:layout_below="@+id/text_view_game"
+            android:layout_gravity="center_horizontal"
+            android:textStyle="bold"
+            android:layout_marginRight="4dp" />
+        <TextView
+            android:id="@+id/text_view_info_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/info_event"
+            android:textColor="@color/light_black"
+            android:textSize="@dimen/points_event"
+            android:layout_marginLeft="4dp"
+            android:layout_below="@+id/text_view_game"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginRight="4dp" />
+        <TextView
+            android:id="@+id/text_view_chat_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/info_event"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/points_event"
+            android:layout_marginLeft="4dp"
+            android:layout_below="@+id/text_view_game"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginRight="4dp" />
+
+    </LinearLayout>
+</RelativeLayout>

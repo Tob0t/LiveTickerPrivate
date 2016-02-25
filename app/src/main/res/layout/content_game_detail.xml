@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="osfma.mcm.fhooe.at.livetickerprivate.ui.gameList.GameDetailActivity"
+    tools:showIn="@layout/activity_game_detail">
+
+    <!-- CardView1-->
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view1"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        card_view:cardCornerRadius="4dp"
+        android:padding="5dp">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textView_game_detail_team1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:text="Schwaiger/Hansel"
+                android:textSize="@dimen/card_game_detail"
+                android:textColor="@color/black"
+                android:gravity="center_vertical|center_horizontal"
+                android:paddingLeft="2dp" />
+            <TextView
+                android:id="@+id/textView_game_detail_team1_points"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="13"
+                android:textSize="@dimen/card_game_detail"
+                android:textColor="@color/black"
+                android:gravity="center_vertical|end"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/textView_game_detail_points_divider"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:text="-"
+                android:textSize="@dimen/card_game_detail"
+                android:textColor="@color/black"
+                android:gravity="center_vertical|center_horizontal"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/textView_game_detail_team2_points"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="14"
+                android:textSize="@dimen/card_game_detail"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:gravity="left|center_vertical" />
+            <TextView
+                android:id="@+id/textView_game_detail_team2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:text="Schwaiger/Hansel"
+                android:textSize="@dimen/card_game_detail"
+                android:textColor="@color/black"
+                android:gravity="center_vertical|center_horizontal" />
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+    <!-- CardView2-->
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view2"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        card_view:cardCornerRadius="4dp"
+        android:layout_below="@+id/card_view1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:stretchColumns="*"
+            android:padding="2dp">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Schwaiger/Hansel"
+                    android:id="@+id/textView_game_detail_table_team1"
+                    android:layout_column="0"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="@string/game_detail_activity_set"
+                    android:id="@+id/textView_game_detail_table_set"
+                    android:layout_column="1"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Hannes/Kannes"
+                    android:id="@+id/textView_game_detail_table_team2"
+                    android:layout_column="2"
+                    android:textAlignment="center" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#fbf303">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="21"
+                    android:id="@+id/textView_game_detail_table_team1_set1"
+                    android:layout_column="0"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="1"
+                    android:id="@+id/textView_game_detail_table_set1"
+                    android:layout_column="1"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="5"
+                    android:id="@+id/textView_game_detail_table_team2_set1"
+                    android:layout_column="2"
+                    android:textAlignment="center" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="14"
+                    android:id="@+id/textView_game_detail_table_team1_set2"
+                    android:layout_column="0"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="2"
+                    android:id="@+id/textView_game_detail_table_set2"
+                    android:layout_column="1"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="14"
+                    android:id="@+id/textView_game_detail_table_team2_set2"
+                    android:layout_column="2"
+                    android:textAlignment="center" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="13"
+                    android:id="@+id/textView_game_detail_table_team1_set3"
+                    android:layout_column="0"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="3"
+                    android:id="@+id/textView_game_detail_table_set3"
+                    android:layout_column="1"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="21"
+                    android:id="@+id/textView_game_detail_table_team2_set3"
+                    android:layout_column="2"
+                    android:textAlignment="center" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </TableRow>
+        </TableLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:id="@+id/listView_game_events"
+        android:layout_below="@+id/card_view2"
+        android:layout_marginTop="10dp"
+        android:layout_above="@+id/editText_chat"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText_chat"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:hint="Type a message"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/listView_game_events"
+        android:layout_alignStart="@+id/listView_game_events"
+        android:layout_toLeftOf="@+id/imageButton_send"
+        android:layout_toStartOf="@+id/imageButton_send" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageButton_send"
+        android:src="@drawable/ic_menu_send"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/listView_game_events"
+        android:layout_alignEnd="@+id/listView_game_events" />
+
+
+</RelativeLayout>
