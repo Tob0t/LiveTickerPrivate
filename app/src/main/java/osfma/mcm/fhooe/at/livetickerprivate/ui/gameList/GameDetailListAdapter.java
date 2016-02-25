@@ -8,8 +8,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.firebase.ui.FirebaseListAdapter;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import osfma.mcm.fhooe.at.livetickerprivate.R;
+import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
+import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 
 /**
  * Created by Tob0t on 24.02.2016.
@@ -27,10 +32,25 @@ public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
         TextView textViewPointsEvent = (TextView) view.findViewById(R.id.text_view_points_event);
         TextView textViewInfoEvent = (TextView) view.findViewById(R.id.text_view_info_event);
         TextView textViewChatEvent = (TextView) view.findViewById(R.id.text_view_chat_event);
+        TextView textViewChatAuthor = (TextView) view.findViewById(R.id.text_view_chat_author);
 
         textViewPointsEvent.setText(gameEvent.getCurrentScore());
         textViewInfoEvent.setText(gameEvent.getInfo());
-        textViewChatEvent.setText(gameEvent.getMessage());
+
+        StringBuffer s = new StringBuffer();
+
+        // Make Map Sorted by Key
+        Map<String, Chat> treeMap = new TreeMap<String, Chat>(gameEvent.getChatMessages());
+
+        for(Map.Entry<String, Chat> entry: treeMap.entrySet()){
+            s.append("Name: "+entry.getValue().getAuthor());
+            s.append(entry.getValue().getMessage());
+            s.append("\n");
+        }
+        textViewChatEvent.setText(s);
+
 
     }
+
+
 }

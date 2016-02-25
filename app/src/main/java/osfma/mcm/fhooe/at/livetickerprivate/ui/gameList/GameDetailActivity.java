@@ -3,8 +3,10 @@ package osfma.mcm.fhooe.at.livetickerprivate.ui.gameList;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -18,7 +20,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Objects;
+
 import osfma.mcm.fhooe.at.livetickerprivate.R;
+import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
@@ -28,7 +36,7 @@ public class GameDetailActivity extends AppCompatActivity {
     private Firebase mActiveGameRef;
     private Firebase mGamesEventsRef;
     private Firebase mLastChildAdded;
-    //private GameEvent mGameEvent;
+    private GameEvent mGameEvent;
     private String mGameId;
     private GameDetailListAdapter mGameDetailListAdapter;
     private ListView mGameDetailListView;
@@ -55,7 +63,6 @@ public class GameDetailActivity extends AppCompatActivity {
          */
         mActiveGameRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
-
 
         /**
          * Link layout elements from XML and setup the toolbar
@@ -91,6 +98,7 @@ public class GameDetailActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 mLastChildAdded = dataSnapshot.getRef();
+                //mGameEvent = dataSnapshot.getValue(GameEvent.class);
             }
 
             @Override
@@ -117,7 +125,7 @@ public class GameDetailActivity extends AppCompatActivity {
         mGamesEventsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //GameEvent gameEvent = dataSnapshot.getValue(GameEvent.class);
+                //mGameEvent = dataSnapshot.getValue(GameEvent.class);
                 /*if(dataSnapshot.getValue() instanceof GameEvent) {
                     mLastChildAdded = dataSnapshot.getRef();
                 }*/
@@ -129,6 +137,7 @@ public class GameDetailActivity extends AppCompatActivity {
 
             }
         });
+
 
 
     }
@@ -173,8 +182,7 @@ public class GameDetailActivity extends AppCompatActivity {
     }
 
     private void sendMessage(String message) {
-        //mGamesEventsRef.push().setValue(new GameEvent(message,"Anonymous"));
-        mLastChildAdded.setValue(new GameEvent(message, "eichel"));
+        mLastChildAdded.child("chatMessages").push().setValue(new Chat(message, "Anonymous"));
     }
 
 

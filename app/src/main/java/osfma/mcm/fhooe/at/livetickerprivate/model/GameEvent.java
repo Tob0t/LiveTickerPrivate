@@ -1,6 +1,9 @@
 package osfma.mcm.fhooe.at.livetickerprivate.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Tob0t on 24.02.2016.
@@ -8,17 +11,15 @@ import java.util.ArrayList;
 public class GameEvent {
     private String currentScore;
     private String info;
-    private ArrayList<String,String> messages;
-    //private String message;
-    //private String owner;
+    private HashMap<String,Chat> chatMessages;
 
     public GameEvent() {
+        chatMessages = new HashMap<>();
     }
 
-    public GameEvent(String currentScore, String info, String message) {
+    public GameEvent(String currentScore, String info) {
         this.currentScore = currentScore;
         this.info = info;
-        ArrayList<String,String> = new ArrayList<String,String>();
     }
 
     public String getCurrentScore() {
@@ -29,11 +30,7 @@ public class GameEvent {
         return info;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public String getOwner() {
-        return owner;
+    public HashMap<String, Chat> getChatMessages() {
+        return chatMessages;
     }
 }
