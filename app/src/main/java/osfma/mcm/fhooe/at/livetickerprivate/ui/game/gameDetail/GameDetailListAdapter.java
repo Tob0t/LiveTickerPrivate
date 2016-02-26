@@ -46,9 +46,9 @@ public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
             s.append("\n");
         }
         textViewChatEvent.setText(s);
-
-
     }
+
+    
 
 
 }

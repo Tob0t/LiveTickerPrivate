@@ -24,8 +24,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
@@ -38,18 +37,20 @@ import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 public class GameDetailActivity extends AppCompatActivity {
     private static final String LOG_TAG = GameDetailActivity.class.getSimpleName();
     private Firebase mActiveGameRef;
+    private Firebase mActiveGameSetsRef;
     private Firebase mGamesEventsRef;
     private Firebase mLastChildAdded;
-    private GameEvent mGameEvent;
     private String mGameId;
     private GameDetailListAdapter mGameDetailListAdapter;
     private ValueEventListener mActiveGameRefListener;
-    private ChildEventListener mGamesEventsRefListener;
+    private ChildEventListener mActiveGameSetsRefListener, mGamesEventsRefListener;
     private ListView mGameDetailListView;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
-    private TextView mTeam1NameTable, mTeam1Points1Set, mTeam1Points2Set, mTeam1Points3Set;
-    private TextView mTeam2NameTable, mTeam2Points1Set, mTeam2Points2Set, mTeam2Points3Set;
-    private TableRow mHeadline,mSet1,mSet2,mSet3;
+    private ArrayList<TextView> mTeam1PointsSets, mTeam2PointsSets;
+    private TextView mTeam1NameTable;
+    private TextView mTeam2NameTable;
+    private ArrayList<TableRow> mSetTableRows;
+    private TableRow mHeadline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +71,8 @@ public class GameDetailActivity extends AppCompatActivity {
          */
         mActiveGameRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
+        mActiveGameSetsRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
 
-        /**
-         * Link layout elements from XML and setup the toolbar
-         */
         initializeScreen();
 
         /**
@@ -93,48 +92,34 @@ public class GameDetailActivity extends AppCompatActivity {
 
                 mTeam1NameTable.setText(game.getTeam1());
                 mTeam2NameTable.setText(game.getTeam2());
+            }
 
-                // Make Map Sorted by Key
-                Map<String, GameSet> treeMap = new TreeMap<String, GameSet>(game.getGameSets());
-                for (Map.Entry<String, GameSet> entry : treeMap.entrySet()) {
-                    if (entry.getKey().equals(Constants.GAMESET_ONE)) {
-                        if (entry.getValue().isRunning()) {
-                            setRunningParameters(entry);
-                            mSet1.setBackgroundColor(Color.YELLOW);
-                        } else {
-                            mSet1.setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        mTeam1Points1Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                        mTeam2Points1Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
-                    } else if (entry.getKey().equals(Constants.GAMESET_TWO)) {
-                        if (entry.getValue().isRunning()) {
-                            setRunningParameters(entry);
-                            mSet2.setBackgroundColor(Color.YELLOW);
-                        } else {
-                            mSet2.setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        mTeam1Points2Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                        mTeam2Points2Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
-                    } else if (entry.getKey().equals(Constants.GAMESET_THREE)) {
-                        if (entry.getValue().isRunning()) {
-                            setRunningParameters(entry);
-                            mSet3.setBackgroundColor(Color.YELLOW);
-                        } else {
-                            mSet3.setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        mTeam1Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                        mTeam2Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
-                    }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
 
-                }
+            }
+        });
 
+        mActiveGameSetsRefListener = mActiveGameSetsRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                // having the right Scores on startup
+                updateView(dataSnapshot);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                updateView(dataSnapshot);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
 
             }
 
-            private void setRunningParameters(Map.Entry<String, GameSet> entry) {
-                // write the score in the middle of the active gameSet
-                mTeam1Points.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                mTeam2Points.setText(String.valueOf(entry.getValue().getScoreTeam2()));
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override
@@ -172,6 +157,40 @@ public class GameDetailActivity extends AppCompatActivity {
 
     }
 
+    private void updateView(DataSnapshot dataSnapshot) {
+        GameSet gameSet = dataSnapshot.getValue(GameSet.class);
+        updateTableScores(dataSnapshot);
+        updateTableRows(dataSnapshot);
+        if(gameSet.isActive()){
+            updateMainScore(gameSet);
+        }
+    }
+
+    private void updateTableRows(DataSnapshot dataSnapshot) {
+        GameSet gameSet = dataSnapshot.getValue(GameSet.class);
+        int currentGameSet = Constants.GAMESETS_LIST.indexOf(dataSnapshot.getKey());
+        if(gameSet.isActive()) {
+            mSetTableRows.get(currentGameSet).setBackgroundColor(Color.YELLOW);
+        } else{
+            mSetTableRows.get(currentGameSet).setBackgroundColor(Color.TRANSPARENT);
+        }
+    }
+
+    private void updateMainScore(GameSet gameSet) {
+        if(gameSet.isActive()) {
+            // write the score in the middle of the active gameSet
+            mTeam1Points.setText(String.valueOf(gameSet.getScoreTeam1()));
+            mTeam2Points.setText(String.valueOf(gameSet.getScoreTeam2()));
+        }
+    }
+
+    private void updateTableScores(DataSnapshot dataSnapshot) {
+        GameSet gameSet = dataSnapshot.getValue(GameSet.class);
+        int currentGameSet = Constants.GAMESETS_LIST.indexOf(dataSnapshot.getKey());
+        mTeam1PointsSets.get(currentGameSet).setText(String.valueOf(gameSet.getScoreTeam1()));
+        mTeam2PointsSets.get(currentGameSet).setText(String.valueOf(gameSet.getScoreTeam2()));
+    }
+
     private void initializeScreen() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -187,18 +206,21 @@ public class GameDetailActivity extends AppCompatActivity {
         mTeam2Points = (TextView) findViewById(R.id.textView_game_detail_team2_points);
 
         mTeam1NameTable = (TextView) findViewById(R.id.textView_game_detail_table_team1);
-        mTeam1Points1Set = (TextView) findViewById(R.id.textView_game_detail_table_team1_set1);
-        mTeam1Points2Set = (TextView) findViewById(R.id.textView_game_detail_table_team1_set2);
-        mTeam1Points3Set = (TextView) findViewById(R.id.textView_game_detail_table_team1_set3);
+        mTeam1PointsSets = new ArrayList<TextView>();
+        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_detail_table_team1_set1));
+        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_detail_table_team1_set2));
+        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_detail_table_team1_set3));
 
         mTeam2NameTable = (TextView) findViewById(R.id.textView_game_detail_table_team2);
-        mTeam2Points1Set = (TextView) findViewById(R.id.textView_game_detail_table_team2_set1);
-        mTeam2Points2Set = (TextView) findViewById(R.id.textView_game_detail_table_team2_set2);
-        mTeam2Points3Set = (TextView) findViewById(R.id.textView_game_detail_table_team2_set3);
+        mTeam2PointsSets = new ArrayList<TextView>();
+        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_detail_table_team2_set1));
+        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_detail_table_team2_set2));
+        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_detail_table_team2_set3));
 
-        mSet1 = (TableRow) findViewById(R.id.tableRow_game_detail_set1);
-        mSet2 = (TableRow) findViewById(R.id.tableRow_game_detail_set2);
-        mSet3 = (TableRow) findViewById(R.id.tableRow_game_detail_set3);
+        mSetTableRows = new ArrayList<TableRow>();
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_game_detail_set1));
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_game_detail_set2));
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_game_detail_set3));
 
         final EditText message = (EditText) findViewById(R.id.editText_chat);
 
@@ -251,7 +273,9 @@ public class GameDetailActivity extends AppCompatActivity {
         mGameDetailListAdapter.cleanup();
         mActiveGameRef.removeEventListener(mActiveGameRefListener);
         mGamesEventsRef.removeEventListener(mGamesEventsRefListener);
+        mActiveGameSetsRef.removeEventListener(mActiveGameSetsRefListener);
         */
+
 
     }
 }

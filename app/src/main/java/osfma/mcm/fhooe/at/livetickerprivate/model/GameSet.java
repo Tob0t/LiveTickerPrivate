@@ -6,16 +6,14 @@ package osfma.mcm.fhooe.at.livetickerprivate.model;
 public class GameSet {
     private int scoreTeam1;
     private int scoreTeam2;
-    private boolean finished;
-    private boolean running;
+    private boolean active;
 
     public GameSet() {
     }
 
-    public GameSet(int scoreTeam1, int scoreTeam2, boolean running) {
+    public GameSet(int scoreTeam1, int scoreTeam2) {
         this.scoreTeam1 = scoreTeam1;
         this.scoreTeam2 = scoreTeam2;
-        this.running = running;
     }
 
     public int getScoreTeam1() {
@@ -26,11 +24,7 @@ public class GameSet {
         return scoreTeam2;
     }
 
-    public boolean isFinished() {
-        return finished;
-    }
-
-    public boolean isRunning() {
-        return running;
+    public boolean isActive() {
+        return active;
     }
 }

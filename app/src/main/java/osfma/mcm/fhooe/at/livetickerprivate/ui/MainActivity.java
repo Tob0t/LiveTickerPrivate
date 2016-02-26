@@ -15,8 +15,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 
 import java.util.Date;
 
@@ -45,9 +48,7 @@ public class MainActivity extends AppCompatActivity
         // Order by Date and filter only future Events
         Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
 
-        /**
-         * Link layout elements from XML and setup the toolbar
-         */
+
         initializeScreen();
 
         /**
@@ -153,9 +154,6 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), GameCreateActivity.class);
                 startActivity(intent);
-
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
             }
         });
 

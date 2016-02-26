@@ -20,12 +20,8 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.TreeMap;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
@@ -43,25 +39,23 @@ public class GameManageActivity extends AppCompatActivity {
     private ValueEventListener mActiveGameRefListener;
     private ChildEventListener mActiveGameSetsRefListener, mGamesEventsRefListener;
     private String mGameId;
-    private TextView mTeam1NameTable, mTeam1Points1Set, mTeam1Points2Set, mTeam1Points3Set;
-    private TextView mTeam2NameTable, mTeam2Points1Set, mTeam2Points2Set, mTeam2Points3Set;
+    private TextView mTeam1NameTable;
+    private ArrayList<TextView> mTeam1PointsSets, mTeam2PointsSets;
+    private TextView mTeam2NameTable;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
     private TextView mCustomEvent;
     private Button mNextSet, mPrevSet;
+    private ArrayList<TableRow> mSetTableRows;
     private TableRow mHeadline,mSet1,mSet2,mSet3;
     private int mTeam1PointsCurrent, mTeam2PointsCurrent;
     private String mActiveGameSet;
+    //private int mActiveGameSetInt;
     private int mNumberGameSets;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_manage);
-
-        // Temp setting on set one
-        mActiveGameSet = Constants.GAMESET_ONE;
-        mNumberGameSets = 1;
-
 
          /* Get the push ID from the extra passed by ShoppingListFragment */
         Intent intent = this.getIntent();
@@ -88,50 +82,6 @@ public class GameManageActivity extends AppCompatActivity {
 
                 mNumberGameSets = game.getGameSets().size();
 
-                // Make Map Sorted by Key
-                Map<String, GameSet> treeMap = new TreeMap<String, GameSet>(game.getGameSets());
-                for (Map.Entry<String, GameSet> entry : treeMap.entrySet()) {
-                    if (entry.getKey().equals(Constants.GAMESET_ONE)) {
-                        if (entry.getValue().isRunning()) {
-                            setRunningParameters(entry);
-                            mSet1.setBackgroundColor(Color.YELLOW);
-                        } else{
-                            mSet1.setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        mTeam1Points1Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                        mTeam2Points1Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
-                    } else if (entry.getKey().equals(Constants.GAMESET_TWO)) {
-                        if (entry.getValue().isRunning()) {
-                            setRunningParameters(entry);
-                            mSet2.setBackgroundColor(Color.YELLOW);
-                        } else{
-                            mSet2.setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        mTeam1Points2Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                        mTeam2Points2Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
-                    } else if (entry.getKey().equals(Constants.GAMESET_THREE)) {
-                        if (entry.getValue().isRunning()) {
-                            setRunningParameters(entry);
-                            mSet3.setBackgroundColor(Color.YELLOW);
-                        } else{
-                            mSet3.setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        mTeam1Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                        mTeam2Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
-                    }
-
-                }
-                mTeam1PointsCurrent = Integer.valueOf(mTeam1Points.getText().toString());
-                mTeam2PointsCurrent = Integer.valueOf(mTeam2Points.getText().toString());
-                updateButtonVisibility();
-            }
-
-            private void setRunningParameters(Map.Entry<String, GameSet> entry) {
-                mActiveGameSet = entry.getKey();
-                // write the score in the middle of the active gameSet
-                mTeam1Points.setText(String.valueOf(entry.getValue().getScoreTeam1()));
-                mTeam2Points.setText(String.valueOf(entry.getValue().getScoreTeam2()));
-
 
             }
 
@@ -144,26 +94,13 @@ public class GameManageActivity extends AppCompatActivity {
         mActiveGameSetsRefListener = mActiveGameSetsRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
+                // having the right Scores on startup
+                updateView(dataSnapshot);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                GameSet gameSet = dataSnapshot.getValue(GameSet.class);
-                /*if (dataSnapshot.getKey().equals(Constants.GAMESET_ONE)) {
-                    mTeam1Points1Set.setText(String.valueOf(gameSet.getScoreTeam1()));
-                    mTeam2Points1Set.setText(String.valueOf(gameSet.getScoreTeam2()));
-                } else if (dataSnapshot.getKey().equals(Constants.GAMESET_TWO)) {
-                    mTeam1Points2Set.setText(String.valueOf(gameSet.getScoreTeam1()));
-                    mTeam2Points2Set.setText(String.valueOf(gameSet.getScoreTeam2()));
-                } else if (dataSnapshot.getKey().equals(Constants.GAMESET_THREE)) {
-                    mTeam1Points3Set.setText(String.valueOf(gameSet.getScoreTeam1()));
-                    mTeam2Points3Set.setText(String.valueOf(gameSet.getScoreTeam2()));
-                }
-                if (gameSet.isRunning()) {
-                    mTeam1Points.setText(String.valueOf(gameSet.getScoreTeam1()));
-                    mTeam2Points.setText(String.valueOf(gameSet.getScoreTeam2()));
-                }*/
+                updateView(dataSnapshot);
             }
 
             @Override
@@ -209,51 +146,73 @@ public class GameManageActivity extends AppCompatActivity {
             }
         });
 
-
         initializeScreen();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mActiveGameRef.removeEventListener(mActiveGameRefListener);
-        mActiveGameSetsRef.removeEventListener(mActiveGameSetsRefListener);
-        mGamesEventsRef.removeEventListener(mGamesEventsRefListener);
-
+    private void updateView(DataSnapshot dataSnapshot) {
+        GameSet gameSet = dataSnapshot.getValue(GameSet.class);
+        updateTableScores(dataSnapshot);
+        updateTableRows(dataSnapshot);
+        if(gameSet.isActive()){
+            mActiveGameSet = dataSnapshot.getKey();
+            updateMainScore(gameSet);
+        }
+        updateButtonVisibility();
     }
+
+    private void updateTableRows(DataSnapshot dataSnapshot) {
+        GameSet gameSet = dataSnapshot.getValue(GameSet.class);
+        int currentGameSet = Constants.GAMESETS_LIST.indexOf(dataSnapshot.getKey());
+        if(gameSet.isActive()) {
+            mSetTableRows.get(currentGameSet).setBackgroundColor(Color.YELLOW);
+        } else{
+            mSetTableRows.get(currentGameSet).setBackgroundColor(Color.TRANSPARENT);
+        }
+    }
+
+    private void updateMainScore(GameSet gameSet) {
+        if(gameSet.isActive()) {
+            // write the score in the middle of the active gameSet
+            mTeam1Points.setText(String.valueOf(gameSet.getScoreTeam1()));
+            mTeam2Points.setText(String.valueOf(gameSet.getScoreTeam2()));
+        }
+    }
+
+    private void updateTableScores(DataSnapshot dataSnapshot) {
+        GameSet gameSet = dataSnapshot.getValue(GameSet.class);
+        int currentGameSet = Constants.GAMESETS_LIST.indexOf(dataSnapshot.getKey());
+        mTeam1PointsSets.get(currentGameSet).setText(String.valueOf(gameSet.getScoreTeam1()));
+        mTeam2PointsSets.get(currentGameSet).setText(String.valueOf(gameSet.getScoreTeam2()));
+    }
+
+
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
             switch (v.getId()) {
                 case R.id.button_increment_team1: {
-                    mTeam1PointsCurrent++;
-                    updateScoresTeam1();
+                    initiateScoreUpdate(Constants.Team.TEAM1, 1);
                     break;
                 }
                 case R.id.button_increment_team2: {
-                    mTeam2PointsCurrent++;
-                    updateScoresTeam2();
+                    initiateScoreUpdate(Constants.Team.TEAM2, 1);
                     break;
                 }
                 case R.id.button_decrement_team1: {
-                    mTeam1PointsCurrent--;
-                    updateScoresTeam1();
+                    initiateScoreUpdate(Constants.Team.TEAM1, -1);
                     break;
                 }
                 case R.id.button_decrement_team2: {
-                    mTeam2PointsCurrent--;
-                    updateScoresTeam2();
+                    initiateScoreUpdate(Constants.Team.TEAM2, -1);
                     break;
                 }
                 case R.id.button_nextSet: {
                     changeGameSet(Constants.Navigate.NEXT);
-                    updateButtonVisibility();
                     break;
                 }
                 case R.id.button_prevSet: {
                     changeGameSet(Constants.Navigate.PREVIOUS);
-                    updateButtonVisibility();
                     break;
                 }
                 case R.id.button_event_ace: {
@@ -277,27 +236,30 @@ public class GameManageActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.button_send_event: {
-                    String message = mCustomEvent.getText().toString();
-                    if (mLastChildAdded != null) {
-                        mLastChildAdded.child("info").setValue(message);
-                        // Hide keyboard
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(mCustomEvent.getWindowToken(), 0);
-                        mCustomEvent.setText("");
-                    } else {
-                        Snackbar.make(v, "Game not started yet!", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    }
+                    sendEvent(v);
                     break;
                 }
+            }
+        }
+
+        private void sendEvent(View v) {
+            String message = mCustomEvent.getText().toString();
+            if (mLastChildAdded != null) {
+                mLastChildAdded.child("info").setValue(message);
+                // Hide keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mCustomEvent.getWindowToken(), 0);
+                mCustomEvent.setText("");
+            } else {
+                Snackbar.make(v, "Game not started yet!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         }
 
         private void changeGameSet(Constants.Navigate direction) {
             HashMap<String, Object> updatedGameSets = new HashMap<String, Object>();
             int activeGameSetInt = Constants.GAMESETS_LIST.indexOf(mActiveGameSet);
-
-            updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_RUNNING, false);
+            updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE, false);
 
             if(direction == Constants.Navigate.NEXT) {
                 if(activeGameSetInt+1 < mNumberGameSets){
@@ -308,10 +270,12 @@ public class GameManageActivity extends AppCompatActivity {
                     mActiveGameSet = Constants.GAMESETS_LIST.get(activeGameSetInt-1);
                 }
             }
-            updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_RUNNING, true);
+            updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE, true);
             mActiveGameSetsRef.updateChildren(updatedGameSets);
        }
     };
+
+
 
     private void updateButtonVisibility() {
         // Visibility of Buttons
@@ -327,14 +291,29 @@ public class GameManageActivity extends AppCompatActivity {
         mNextSet.setVisibility(visibilityNext);
     }
 
-    private void updateScoresTeam2() {
-        mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_SCORETEAM2).setValue(mTeam2PointsCurrent);
+    private void initiateScoreUpdate(Constants.Team team, int unaryValue) {
+        // Set Game state to started if it isnt set yet
+        if(mLastChildAdded == null){
+            mActiveGameSet = Constants.GAMESET_ONE;
+            mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_STARTED).setValue(true);
+            mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE).setValue(true);
+        }
+        updateScore(team, unaryValue);
         createGameEvent();
     }
 
-    private void updateScoresTeam1() {
-        mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_SCORETEAM1).setValue(mTeam1PointsCurrent);
-        createGameEvent();
+    private void updateScore(Constants.Team team, int unaryValue) {
+        HashMap<String, Object> updatedScores = new HashMap<String, Object>();
+        mTeam1PointsCurrent = Integer.valueOf(mTeam1Points.getText().toString());
+        mTeam2PointsCurrent = Integer.valueOf(mTeam2Points.getText().toString());
+        if(team == Constants.Team.TEAM1){
+            mTeam1PointsCurrent += unaryValue;
+            updatedScores.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_SCORETEAM1, mTeam1PointsCurrent);
+        } else if(team == Constants.Team.TEAM2){
+            mTeam2PointsCurrent += unaryValue;
+            updatedScores.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_SCORETEAM2, mTeam2PointsCurrent);
+        }
+        mActiveGameSetsRef.updateChildren(updatedScores);
     }
 
     private void createGameEvent() {
@@ -359,14 +338,16 @@ public class GameManageActivity extends AppCompatActivity {
         mTeam2Points = (TextView) findViewById(R.id.textView_game_manage_team2_points);
 
         mTeam1NameTable = (TextView) findViewById(R.id.textView_game_manage_table_team1);
-        mTeam1Points1Set = (TextView) findViewById(R.id.textView_game_manage_table_team1_set1);
-        mTeam1Points2Set = (TextView) findViewById(R.id.textView_game_manage_table_team1_set2);
-        mTeam1Points3Set = (TextView) findViewById(R.id.textView_game_manage_table_team1_set3);
+        mTeam1PointsSets = new ArrayList<TextView>();
+        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team1_set1));
+        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team1_set2));
+        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team1_set3));
 
         mTeam2NameTable = (TextView) findViewById(R.id.textView_game_manage_table_team2);
-        mTeam2Points1Set = (TextView) findViewById(R.id.textView_game_manage_table_team2_set1);
-        mTeam2Points2Set = (TextView) findViewById(R.id.textView_game_manage_table_team2_set2);
-        mTeam2Points3Set = (TextView) findViewById(R.id.textView_game_manage_table_team2_set3);
+        mTeam2PointsSets = new ArrayList<TextView>();
+        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set1));
+        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set2));
+        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set3));
 
         Button incrementTeam1 = (Button) findViewById(R.id.button_increment_team1);
         Button incrementTeam2 = (Button) findViewById(R.id.button_increment_team2);
@@ -385,9 +366,10 @@ public class GameManageActivity extends AppCompatActivity {
         mNextSet = (Button) findViewById(R.id.button_nextSet);
         mPrevSet = (Button) findViewById(R.id.button_prevSet);
 
-        mSet1 = (TableRow) findViewById(R.id.tableRow_manage_game_set1);
-        mSet2 = (TableRow) findViewById(R.id.tableRow_manage_game_set2);
-        mSet3 = (TableRow) findViewById(R.id.tableRow_manage_game_set3);
+        mSetTableRows = new ArrayList<TableRow>();
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set1));
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set2));
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set3));
 
         incrementTeam1.setOnClickListener(onClickListener);
         incrementTeam2.setOnClickListener(onClickListener);
@@ -402,17 +384,15 @@ public class GameManageActivity extends AppCompatActivity {
 
         mNextSet.setOnClickListener(onClickListener);
         mPrevSet.setOnClickListener(onClickListener);
-
-
-        if(mActiveGameSet.equals(Constants.GAMESET_ONE)){
-            mNextSet.setVisibility(View.VISIBLE);
-            mPrevSet.setVisibility(View.INVISIBLE);
-        } else if(mActiveGameSet.equals(Constants.GAMESET_TWO)){
-            mPrevSet.setVisibility(View.VISIBLE);
-            mNextSet.setVisibility(View.INVISIBLE);
-        }
-
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mActiveGameRef.removeEventListener(mActiveGameRefListener);
+        mActiveGameSetsRef.removeEventListener(mActiveGameSetsRefListener);
+        mGamesEventsRef.removeEventListener(mGamesEventsRefListener);
+
+    }
 
 }

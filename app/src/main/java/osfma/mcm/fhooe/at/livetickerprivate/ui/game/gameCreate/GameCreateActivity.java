@@ -138,7 +138,7 @@ public class GameCreateActivity extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Game newGame = new Game(sportType,team1,team2,dateAndTime);
+        Game newGame = new Game(sportType,team1,team2,dateAndTime,2);
 
         ref.child(Constants.FIREBASE_LOCATION_GAMES).push().setValue(newGame);
 
