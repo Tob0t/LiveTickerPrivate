@@ -22,8 +22,8 @@ import java.util.Date;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.CreateGameActivity;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.gameList.GameDetailActivity;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameCreate.GameCreateActivity;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail.GameDetailActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.GameListItemAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 
@@ -134,6 +134,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Cleanup when the activity is destroyed.
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mGameListItemAdapter.cleanup();
+    }
+
     private void initializeScreen() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -142,7 +151,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), CreateGameActivity.class);
+                Intent intent = new Intent(getApplicationContext(), GameCreateActivity.class);
                 startActivity(intent);
 
                 /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)

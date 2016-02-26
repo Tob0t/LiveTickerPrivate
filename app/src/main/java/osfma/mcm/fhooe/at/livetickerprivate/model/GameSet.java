@@ -12,9 +12,10 @@ public class GameSet {
     public GameSet() {
     }
 
-    public GameSet(int scoreTeam1, int scoreTeam2) {
+    public GameSet(int scoreTeam1, int scoreTeam2, boolean running) {
         this.scoreTeam1 = scoreTeam1;
         this.scoreTeam2 = scoreTeam2;
+        this.running = running;
     }
 
     public int getScoreTeam1() {

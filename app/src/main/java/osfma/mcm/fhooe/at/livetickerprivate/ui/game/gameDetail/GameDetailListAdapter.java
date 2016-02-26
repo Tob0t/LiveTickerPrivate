@@ -1,10 +1,9 @@
-package osfma.mcm.fhooe.at.livetickerprivate.ui.gameList;
+package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail;
 
 import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.firebase.ui.FirebaseListAdapter;
 
@@ -14,7 +13,6 @@ import java.util.TreeMap;
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
-import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 
 /**
  * Created by Tob0t on 24.02.2016.

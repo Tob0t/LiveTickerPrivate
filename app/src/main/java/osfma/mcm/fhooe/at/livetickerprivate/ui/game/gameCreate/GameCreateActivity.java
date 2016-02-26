@@ -1,4 +1,4 @@
-package osfma.mcm.fhooe.at.livetickerprivate.ui.game;
+package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameCreate;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -24,12 +24,11 @@ import java.util.Date;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
-import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.MainActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
-public class CreateGameActivity extends AppCompatActivity {
+public class GameCreateActivity extends AppCompatActivity {
     private Spinner mSportType;
     private EditText mTeam1, mTeam2, mDate, mTime;
     private DatePickerDialog mDatePickerDialog;
@@ -38,7 +37,7 @@ public class CreateGameActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_game);
+        setContentView(R.layout.activity_game_create);
 
         /**
          * Link layout elements from XML and setup the toolbar
@@ -141,24 +140,8 @@ public class CreateGameActivity extends AppCompatActivity {
         }
         Game newGame = new Game(sportType,team1,team2,dateAndTime);
 
-        //ref.child("games").push().setValue(newGame);
+        ref.child(Constants.FIREBASE_LOCATION_GAMES).push().setValue(newGame);
 
-        /***/
-        // Temp function to get the key
-        Firebase tempRef = ref.child("games").push();
-        tempRef.setValue(newGame);
-        String temp = tempRef.getKey();
-
-        ref.child("games_events").child(temp).push().setValue(new GameEvent("21:22","LineShot"));
-        ref.child("games_events").child(temp).push().setValue(new GameEvent("21:23", "Ass"));
-        ref.child("games_events").child(temp).push().setValue(new GameEvent("21:24","Cut"));
-        ref.child("games_events").child(temp).push().setValue(new GameEvent("21:25","Cross"));
-        ref.child("games_events").child(temp).push().setValue(new GameEvent("21:26", "LineShot"));
-        ref.child("games_events").child(temp).push().setValue(new GameEvent("21:22","LineShot"));
-        ref.child("games_events").child(temp).push().setValue(new GameEvent("21:23", "Ass"));
-
-
-         /***/
     }
 
 }

@@ -1,9 +1,10 @@
-package osfma.mcm.fhooe.at.livetickerprivate.ui.gameList;
+package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,7 +17,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -32,8 +32,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.CreateGameActivity;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.ManageGameActivity;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameManage.GameManageActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 
 public class GameDetailActivity extends AppCompatActivity {
@@ -44,6 +43,8 @@ public class GameDetailActivity extends AppCompatActivity {
     private GameEvent mGameEvent;
     private String mGameId;
     private GameDetailListAdapter mGameDetailListAdapter;
+    private ValueEventListener mActiveGameRefListener;
+    private ChildEventListener mGamesEventsRefListener;
     private ListView mGameDetailListView;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
     private TextView mTeam1NameTable, mTeam1Points1Set, mTeam1Points2Set, mTeam1Points3Set;
@@ -83,7 +84,7 @@ public class GameDetailActivity extends AppCompatActivity {
         /* Create ActiveListItemAdapter and set to listView */
         mGameDetailListView.setAdapter(mGameDetailListAdapter);
 
-        mActiveGameRef.addValueEventListener(new ValueEventListener() {
+        mActiveGameRefListener = mActiveGameRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Game game = dataSnapshot.getValue(Game.class);
@@ -100,7 +101,7 @@ public class GameDetailActivity extends AppCompatActivity {
                         if (entry.getValue().isRunning()) {
                             setRunningParameters(entry);
                             mSet1.setBackgroundColor(Color.YELLOW);
-                        } else{
+                        } else {
                             mSet1.setBackgroundColor(Color.TRANSPARENT);
                         }
                         mTeam1Points1Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
@@ -109,7 +110,7 @@ public class GameDetailActivity extends AppCompatActivity {
                         if (entry.getValue().isRunning()) {
                             setRunningParameters(entry);
                             mSet2.setBackgroundColor(Color.YELLOW);
-                        } else{
+                        } else {
                             mSet2.setBackgroundColor(Color.TRANSPARENT);
                         }
                         mTeam1Points2Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
@@ -118,8 +119,8 @@ public class GameDetailActivity extends AppCompatActivity {
                         if (entry.getValue().isRunning()) {
                             setRunningParameters(entry);
                             mSet3.setBackgroundColor(Color.YELLOW);
-                        } else{
-                            mSet2.setBackgroundColor(Color.TRANSPARENT);
+                        } else {
+                            mSet3.setBackgroundColor(Color.TRANSPARENT);
                         }
                         mTeam1Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
                         mTeam2Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
@@ -142,7 +143,7 @@ public class GameDetailActivity extends AppCompatActivity {
             }
         });
 
-        mGamesEventsRef.addChildEventListener(new ChildEventListener() {
+        mGamesEventsRefListener = mGamesEventsRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 mLastChildAdded = dataSnapshot.getRef();
@@ -168,24 +169,6 @@ public class GameDetailActivity extends AppCompatActivity {
 
             }
         });
-
-        mGamesEventsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //mGameEvent = dataSnapshot.getValue(GameEvent.class);
-                /*if(dataSnapshot.getValue() instanceof GameEvent) {
-                    mLastChildAdded = dataSnapshot.getRef();
-                }*/
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-
-
 
     }
 
@@ -223,7 +206,7 @@ public class GameDetailActivity extends AppCompatActivity {
         ButtonSendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(message.getText().toString());
+                sendMessage(message.getText().toString(), v);
                 // Hide keyboard
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(message.getWindowToken(), 0);
@@ -232,11 +215,12 @@ public class GameDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMessage(String message) {
+    private void sendMessage(String message, View view) {
         if(mLastChildAdded != null) {
             mLastChildAdded.child("chatMessages").push().setValue(new Chat(message, "Anonymous"));
         } else{
-            Toast.makeText(GameDetailActivity.this, "Event not started yet!", Toast.LENGTH_SHORT).show();
+            Snackbar.make(view, "Game not started yet!", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
         }
     }
 
@@ -251,10 +235,23 @@ public class GameDetailActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_manage_game){
-            Intent intent = new Intent(getApplicationContext(), ManageGameActivity.class);
+            Intent intent = new Intent(getApplicationContext(), GameManageActivity.class);
             intent.putExtra(Constants.KEY_LIST_ID, mGameId);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // TODO FIX Error
+        // Error because arrow button from ManageView guides to MainActivity and not DetailActivity
+        /*
+        mGameDetailListAdapter.cleanup();
+        mActiveGameRef.removeEventListener(mActiveGameRefListener);
+        mGamesEventsRef.removeEventListener(mGamesEventsRefListener);
+        */
+
     }
 }
