@@ -1,9 +1,7 @@
 package osfma.mcm.fhooe.at.livetickerprivate.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 
 /**
  * Created by Tob0t on 24.02.2016.

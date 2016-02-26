@@ -32,7 +32,6 @@ public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
         TextView textViewPointsEvent = (TextView) view.findViewById(R.id.text_view_points_event);
         TextView textViewInfoEvent = (TextView) view.findViewById(R.id.text_view_info_event);
         TextView textViewChatEvent = (TextView) view.findViewById(R.id.text_view_chat_event);
-        TextView textViewChatAuthor = (TextView) view.findViewById(R.id.text_view_chat_author);
 
         textViewPointsEvent.setText(gameEvent.getCurrentScore());
         textViewInfoEvent.setText(gameEvent.getInfo());
@@ -43,7 +42,8 @@ public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
         Map<String, Chat> treeMap = new TreeMap<String, Chat>(gameEvent.getChatMessages());
 
         for(Map.Entry<String, Chat> entry: treeMap.entrySet()){
-            s.append("Name: "+entry.getValue().getAuthor());
+            s.append(entry.getValue().getAuthor());
+            s.append(": ");
             s.append(entry.getValue().getMessage());
             s.append("\n");
         }

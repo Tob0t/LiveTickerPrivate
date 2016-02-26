@@ -42,24 +42,14 @@
             android:layout_marginRight="4dp" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Text"
-            android:textSize="@dimen/author_chat"
-            android:textColor="#dbdbdb"
-            android:id="@+id/text_view_chat_author" />
-
-        <TextView
             android:id="@+id/text_view_chat_event"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/info_event"
             android:textColor="@color/colorPrimary"
             android:textSize="@dimen/points_event"
-            android:layout_marginLeft="4dp"
             android:layout_below="@+id/text_view_game"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginRight="4dp" />
+            android:layout_gravity="center_horizontal" />
 
     </LinearLayout>
 </RelativeLayout>

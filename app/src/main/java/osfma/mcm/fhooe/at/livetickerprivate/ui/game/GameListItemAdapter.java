@@ -33,14 +33,14 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
         textViewTime.setText(Helper.TIME_FORMATTER.format(game.getDateAndTime()));
 
         // Format SetView
-        StringBuffer s = new StringBuffer();
-        if(game.getSets() != null) {
-            for (String set : game.getSets()) {
+       /* StringBuffer s = new StringBuffer();
+        if(game.getGameSets() != null) {
+            for (String set : game.getGameSets()) {
                 s.append(" | ");
                 s.append(set);
             }
             textViewSets.setText(s);
-        }
+        }*/
 
         // Format GameState
         String[] gameStates = view.getResources().getStringArray(R.array.game_states);

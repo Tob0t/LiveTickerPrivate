@@ -2,17 +2,21 @@ package osfma.mcm.fhooe.at.livetickerprivate.ui.gameList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -20,15 +24,16 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.Map;
+import java.util.TreeMap;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
+import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.CreateGameActivity;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.ManageGameActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 
 public class GameDetailActivity extends AppCompatActivity {
@@ -43,6 +48,7 @@ public class GameDetailActivity extends AppCompatActivity {
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
     private TextView mTeam1NameTable, mTeam1Points1Set, mTeam1Points2Set, mTeam1Points3Set;
     private TextView mTeam2NameTable, mTeam2Points1Set, mTeam2Points2Set, mTeam2Points3Set;
+    private TableRow mHeadline,mSet1,mSet2,mSet3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +92,48 @@ public class GameDetailActivity extends AppCompatActivity {
 
                 mTeam1NameTable.setText(game.getTeam1());
                 mTeam2NameTable.setText(game.getTeam2());
+
+                // Make Map Sorted by Key
+                Map<String, GameSet> treeMap = new TreeMap<String, GameSet>(game.getGameSets());
+                for (Map.Entry<String, GameSet> entry : treeMap.entrySet()) {
+                    if (entry.getKey().equals(Constants.GAMESET_ONE)) {
+                        if (entry.getValue().isRunning()) {
+                            setRunningParameters(entry);
+                            mSet1.setBackgroundColor(Color.YELLOW);
+                        } else{
+                            mSet1.setBackgroundColor(Color.TRANSPARENT);
+                        }
+                        mTeam1Points1Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
+                        mTeam2Points1Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
+                    } else if (entry.getKey().equals(Constants.GAMESET_TWO)) {
+                        if (entry.getValue().isRunning()) {
+                            setRunningParameters(entry);
+                            mSet2.setBackgroundColor(Color.YELLOW);
+                        } else{
+                            mSet2.setBackgroundColor(Color.TRANSPARENT);
+                        }
+                        mTeam1Points2Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
+                        mTeam2Points2Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
+                    } else if (entry.getKey().equals(Constants.GAMESET_THREE)) {
+                        if (entry.getValue().isRunning()) {
+                            setRunningParameters(entry);
+                            mSet3.setBackgroundColor(Color.YELLOW);
+                        } else{
+                            mSet2.setBackgroundColor(Color.TRANSPARENT);
+                        }
+                        mTeam1Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam1()));
+                        mTeam2Points3Set.setText(String.valueOf(entry.getValue().getScoreTeam2()));
+                    }
+
+                }
+
+
+            }
+
+            private void setRunningParameters(Map.Entry<String, GameSet> entry) {
+                // write the score in the middle of the active gameSet
+                mTeam1Points.setText(String.valueOf(entry.getValue().getScoreTeam1()));
+                mTeam2Points.setText(String.valueOf(entry.getValue().getScoreTeam2()));
             }
 
             @Override
@@ -98,7 +146,6 @@ public class GameDetailActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 mLastChildAdded = dataSnapshot.getRef();
-                //mGameEvent = dataSnapshot.getValue(GameEvent.class);
             }
 
             @Override
@@ -166,6 +213,10 @@ public class GameDetailActivity extends AppCompatActivity {
         mTeam2Points2Set = (TextView) findViewById(R.id.textView_game_detail_table_team2_set2);
         mTeam2Points3Set = (TextView) findViewById(R.id.textView_game_detail_table_team2_set3);
 
+        mSet1 = (TableRow) findViewById(R.id.tableRow_game_detail_set1);
+        mSet2 = (TableRow) findViewById(R.id.tableRow_game_detail_set2);
+        mSet3 = (TableRow) findViewById(R.id.tableRow_game_detail_set3);
+
         final EditText message = (EditText) findViewById(R.id.editText_chat);
 
         ImageButton ButtonSendMessage = (ImageButton) findViewById(R.id.imageButton_send);
@@ -182,9 +233,28 @@ public class GameDetailActivity extends AppCompatActivity {
     }
 
     private void sendMessage(String message) {
-        mLastChildAdded.child("chatMessages").push().setValue(new Chat(message, "Anonymous"));
+        if(mLastChildAdded != null) {
+            mLastChildAdded.child("chatMessages").push().setValue(new Chat(message, "Anonymous"));
+        } else{
+            Toast.makeText(GameDetailActivity.this, "Event not started yet!", Toast.LENGTH_SHORT).show();
+        }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_game_detail, menu);
+        return true;
+    }
 
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_manage_game){
+            Intent intent = new Intent(getApplicationContext(), ManageGameActivity.class);
+            intent.putExtra(Constants.KEY_LIST_ID, mGameId);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
