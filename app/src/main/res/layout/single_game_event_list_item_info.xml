@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"  android:background="@drawable/bkg"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Changed to 2nd Set"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:id="@+id/text_view_message"
+            android:textSize="@dimen/points_event"
+            android:textAlignment="center" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Admin"
+            android:visibility="invisible"
+            style="@style/chat_timings"
+            android:id="@+id/text_view_author"
+            android:layout_alignBottom="@+id/text_view_message"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="21:15"
+            style="@style/chat_timings"
+            android:id="@+id/text_view_timestamp"
+            android:layout_alignBottom="@+id/text_view_message"
+            android:layout_alignRight="@+id/text_view_message"
+            android:layout_alignEnd="@+id/text_view_message" />
+    </RelativeLayout>
+
+</RelativeLayout>

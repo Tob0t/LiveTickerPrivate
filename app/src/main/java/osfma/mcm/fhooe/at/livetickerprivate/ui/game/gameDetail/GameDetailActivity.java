@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.databind.deser.Deserializers;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -27,19 +28,19 @@ import com.firebase.client.ValueEventListener;
 import java.util.ArrayList;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
-import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameManage.GameManageActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
+import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
-public class GameDetailActivity extends AppCompatActivity {
+public class GameDetailActivity extends BaseActivity {
     private static final String LOG_TAG = GameDetailActivity.class.getSimpleName();
     private Firebase mActiveGameRef;
     private Firebase mActiveGameSetsRef;
     private Firebase mGamesEventsRef;
-    private Firebase mLastChildAdded;
     private String mGameId;
     private GameDetailListAdapter mGameDetailListAdapter;
     private ValueEventListener mActiveGameRefListener;
@@ -51,6 +52,7 @@ public class GameDetailActivity extends AppCompatActivity {
     private TextView mTeam2NameTable;
     private ArrayList<TableRow> mSetTableRows;
     private TableRow mHeadline;
+    private boolean mCurrentUserIsOwner = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,13 +75,20 @@ public class GameDetailActivity extends AppCompatActivity {
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
         mActiveGameSetsRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
 
+
+
         initializeScreen();
 
         /**
          * Setup the adapter
          */
+        int[] listItems = new int[]{
+                R.layout.single_game_event_list_item_score,
+                R.layout.single_game_event_list_item_message,
+                R.layout.single_game_event_list_item_info
+        };
         mGameDetailListAdapter = new GameDetailListAdapter(this, GameEvent.class,
-                R.layout.single_game_event_list_item, mGamesEventsRef);
+                listItems, mGamesEventsRef);
         /* Create ActiveListItemAdapter and set to listView */
         mGameDetailListView.setAdapter(mGameDetailListAdapter);
 
@@ -92,6 +101,10 @@ public class GameDetailActivity extends AppCompatActivity {
 
                 mTeam1NameTable.setText(game.getTeam1());
                 mTeam2NameTable.setText(game.getTeam2());
+
+                /* Check if the current user is owner */
+                mCurrentUserIsOwner = Helper.checkIfOwner(game, mEncodedEmail);
+
             }
 
             @Override
@@ -110,33 +123,6 @@ public class GameDetailActivity extends AppCompatActivity {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 updateView(dataSnapshot);
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-
-        mGamesEventsRefListener = mGamesEventsRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mLastChildAdded = dataSnapshot.getRef();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
@@ -238,12 +224,7 @@ public class GameDetailActivity extends AppCompatActivity {
     }
 
     private void sendMessage(String message, View view) {
-        if(mLastChildAdded != null) {
-            mLastChildAdded.child("chatMessages").push().setValue(new Chat(message, "Anonymous"));
-        } else{
-            Snackbar.make(view, "Game not started yet!", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-        }
+        mGamesEventsRef.push().setValue(new GameEvent(message,"Anonymous", Constants.ItemType.CHAT));
     }
 
     @Override
@@ -251,6 +232,11 @@ public class GameDetailActivity extends AppCompatActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_game_detail, menu);
+
+        // set the manage button only visible if the user is owner
+        MenuItem manage = menu.findItem(R.id.action_manage_game);
+        manage.setVisible(mCurrentUserIsOwner);
+
         return true;
     }
 
@@ -265,7 +251,7 @@ public class GameDetailActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         // TODO FIX Error
         // Error because arrow button from ManageView guides to MainActivity and not DetailActivity

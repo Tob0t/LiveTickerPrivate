@@ -444,7 +444,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/event_finish_game"
-        android:id="@+id/bt_finish_game"
+        android:id="@+id/button_finish_game"
         android:layout_below="@+id/card_view4"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />

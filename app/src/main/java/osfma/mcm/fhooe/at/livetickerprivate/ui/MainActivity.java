@@ -9,6 +9,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,17 +26,20 @@ import java.util.Date;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
+import osfma.mcm.fhooe.at.livetickerprivate.model.User;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameCreate.GameCreateActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail.GameDetailActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.GameListItemAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private ListView mGamesView;
     private GameListItemAdapter mGameListItemAdapter;
     private Firebase mGamesListRef;
+    private Firebase mUserRef;
+    private ValueEventListener mUserRefListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +49,8 @@ public class MainActivity extends AppCompatActivity
          * Create Firebase references
          */
         mGamesListRef = new Firebase(Constants.FIREBASE_URL_GAMES);
+        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
+
         // Order by Date and filter only future Events
         Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
 
@@ -74,6 +80,20 @@ public class MainActivity extends AppCompatActivity
                     /* Starts an activity showing the details for the selected list */
                     startActivity(intent);
                 }
+            }
+        });
+
+        mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(LOG_TAG, getString(R.string.log_error_the_read_failed)
+                        +firebaseError.getMessage());
             }
         });
     }
@@ -128,6 +148,9 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_send) {
 
+        } else if (id == R.id.action_logout) {
+            logout();
+            return true;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -139,9 +162,10 @@ public class MainActivity extends AppCompatActivity
      * Cleanup when the activity is destroyed.
      */
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         mGameListItemAdapter.cleanup();
+        mUserRef.removeEventListener(mUserRefListener);
     }
 
     private void initializeScreen() {

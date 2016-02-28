@@ -24,11 +24,12 @@ import java.util.Date;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.MainActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
-public class GameCreateActivity extends AppCompatActivity {
+public class GameCreateActivity extends BaseActivity {
     private Spinner mSportType;
     private EditText mTeam1, mTeam2, mDate, mTime;
     private DatePickerDialog mDatePickerDialog;
@@ -138,7 +139,7 @@ public class GameCreateActivity extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Game newGame = new Game(sportType,team1,team2,dateAndTime,2);
+        Game newGame = new Game(sportType,team1,team2,dateAndTime,3,mEncodedEmail);
 
         ref.child(Constants.FIREBASE_LOCATION_GAMES).push().setValue(newGame);
 

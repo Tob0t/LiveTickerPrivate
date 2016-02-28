@@ -248,6 +248,8 @@
         android:layout_below="@+id/card_view2"
         android:layout_marginTop="10dp"
         android:layout_above="@+id/editText_chat"
+        android:dividerHeight="0dp"
+        android:divider="@null"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

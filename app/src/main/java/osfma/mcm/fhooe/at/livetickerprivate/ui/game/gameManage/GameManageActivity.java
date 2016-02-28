@@ -46,16 +46,20 @@ public class GameManageActivity extends AppCompatActivity {
     private TextView mCustomEvent;
     private Button mNextSet, mPrevSet;
     private ArrayList<TableRow> mSetTableRows;
-    private TableRow mHeadline,mSet1,mSet2,mSet3;
+    private TableRow mHeadline;
     private int mTeam1PointsCurrent, mTeam2PointsCurrent;
     private String mActiveGameSet;
-    //private int mActiveGameSetInt;
     private int mNumberGameSets;
+    private boolean mGameStarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_manage);
+
+        // some inital variables
+        mActiveGameSet = Constants.GAMESET_ONE;
+        mGameStarted = false;
 
          /* Get the push ID from the extra passed by ShoppingListFragment */
         Intent intent = this.getIntent();
@@ -239,12 +243,16 @@ public class GameManageActivity extends AppCompatActivity {
                     sendEvent(v);
                     break;
                 }
+                case R.id.button_finish_game:{
+                    sendFinishGame();
+                    break;
+                }
             }
         }
 
         private void sendEvent(View v) {
             String message = mCustomEvent.getText().toString();
-            if (mLastChildAdded != null) {
+            if (mGameStarted) {
                 mLastChildAdded.child("info").setValue(message);
                 // Hide keyboard
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -256,6 +264,11 @@ public class GameManageActivity extends AppCompatActivity {
             }
         }
 
+        private void sendFinishGame() {
+            mGamesEventsRef.push().setValue(new GameEvent("Game is finished! Thank you for using the liveticker!","Admin", Constants.ItemType.INFO));
+            mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_FINISHED).setValue(true);
+        }
+
         private void changeGameSet(Constants.Navigate direction) {
             HashMap<String, Object> updatedGameSets = new HashMap<String, Object>();
             int activeGameSetInt = Constants.GAMESETS_LIST.indexOf(mActiveGameSet);
@@ -264,16 +277,19 @@ public class GameManageActivity extends AppCompatActivity {
             if(direction == Constants.Navigate.NEXT) {
                 if(activeGameSetInt+1 < mNumberGameSets){
                     mActiveGameSet = Constants.GAMESETS_LIST.get(activeGameSetInt+1);
+                    mGamesEventsRef.push().setValue(new GameEvent("Changed to "+mActiveGameSet,"Admin", Constants.ItemType.INFO));
                 }
             } else if(direction == Constants.Navigate.PREVIOUS){
                 if(activeGameSetInt > 0){
                     mActiveGameSet = Constants.GAMESETS_LIST.get(activeGameSetInt-1);
+                    mGamesEventsRef.push().setValue(new GameEvent("Changed to "+mActiveGameSet,"Admin", Constants.ItemType.INFO));
                 }
             }
             updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE, true);
             mActiveGameSetsRef.updateChildren(updatedGameSets);
        }
     };
+
 
 
 
@@ -293,8 +309,8 @@ public class GameManageActivity extends AppCompatActivity {
 
     private void initiateScoreUpdate(Constants.Team team, int unaryValue) {
         // Set Game state to started if it isnt set yet
-        if(mLastChildAdded == null){
-            mActiveGameSet = Constants.GAMESET_ONE;
+        if(!mGameStarted){
+            mGameStarted = true;
             mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_STARTED).setValue(true);
             mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE).setValue(true);
         }
@@ -321,7 +337,7 @@ public class GameManageActivity extends AppCompatActivity {
         score.append(mTeam1PointsCurrent);
         score.append(":");
         score.append(mTeam2PointsCurrent);
-        mGamesEventsRef.push().setValue(new GameEvent(score.toString(),mCustomEvent.getText().toString()));
+        mGamesEventsRef.push().setValue(new GameEvent(score.toString(),mCustomEvent.getText().toString(),"Admin",Constants.ItemType.SCORE));
         mCustomEvent.setText("");
     }
 
@@ -349,6 +365,11 @@ public class GameManageActivity extends AppCompatActivity {
         mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set2));
         mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set3));
 
+        mSetTableRows = new ArrayList<TableRow>();
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set1));
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set2));
+        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set3));
+
         Button incrementTeam1 = (Button) findViewById(R.id.button_increment_team1);
         Button incrementTeam2 = (Button) findViewById(R.id.button_increment_team2);
         Button decrementTeam1 = (Button) findViewById(R.id.button_decrement_team1);
@@ -366,10 +387,7 @@ public class GameManageActivity extends AppCompatActivity {
         mNextSet = (Button) findViewById(R.id.button_nextSet);
         mPrevSet = (Button) findViewById(R.id.button_prevSet);
 
-        mSetTableRows = new ArrayList<TableRow>();
-        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set1));
-        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set2));
-        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set3));
+        Button finishGame = (Button) findViewById(R.id.button_finish_game);
 
         incrementTeam1.setOnClickListener(onClickListener);
         incrementTeam2.setOnClickListener(onClickListener);
@@ -381,6 +399,7 @@ public class GameManageActivity extends AppCompatActivity {
         eventCut.setOnClickListener(onClickListener);
         eventRainbow.setOnClickListener(onClickListener);
         eventSend.setOnClickListener(onClickListener);
+        finishGame.setOnClickListener(onClickListener);
 
         mNextSet.setOnClickListener(onClickListener);
         mPrevSet.setOnClickListener(onClickListener);

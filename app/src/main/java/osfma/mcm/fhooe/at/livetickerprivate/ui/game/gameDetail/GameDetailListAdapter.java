@@ -5,50 +5,59 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.firebase.client.Query;
-import com.firebase.ui.FirebaseListAdapter;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
-import osfma.mcm.fhooe.at.livetickerprivate.model.Chat;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
+import osfma.mcm.fhooe.at.livetickerprivate.utils.FireBaseMultipleItems.FirebaseListAdapterMultipleItems;
+import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
 /**
  * Created by Tob0t on 24.02.2016.
  */
-public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
+public class GameDetailListAdapter extends FirebaseListAdapterMultipleItems<GameEvent> {
+    private static final String LOG_TAG = GameDetailListAdapter.class.getSimpleName();
 
-    public GameDetailListAdapter(Activity activity, Class<GameEvent> modelClass, int modelLayout, Query ref) {
+    public GameDetailListAdapter(Activity activity, Class<GameEvent> modelClass, int[] modelLayout, Query ref) {
         super(activity, modelClass, modelLayout, ref);
         this.mActivity = activity;
     }
 
     @Override
     protected void populateView(View view, GameEvent gameEvent, int i) {
+        TextView author = (TextView) view.findViewById(R.id.text_view_author);
+        TextView message = (TextView) view.findViewById(R.id.text_view_message);
+        TextView timestamp = (TextView) view.findViewById(R.id.text_view_timestamp);
 
-        TextView textViewPointsEvent = (TextView) view.findViewById(R.id.text_view_points_event);
-        TextView textViewInfoEvent = (TextView) view.findViewById(R.id.text_view_info_event);
-        TextView textViewChatEvent = (TextView) view.findViewById(R.id.text_view_chat_event);
-
-        textViewPointsEvent.setText(gameEvent.getCurrentScore());
-        textViewInfoEvent.setText(gameEvent.getInfo());
-
-        StringBuffer s = new StringBuffer();
-
-        // Make Map Sorted by Key
-        Map<String, Chat> treeMap = new TreeMap<String, Chat>(gameEvent.getChatMessages());
-
-        for(Map.Entry<String, Chat> entry: treeMap.entrySet()){
-            s.append(entry.getValue().getAuthor());
-            s.append(": ");
-            s.append(entry.getValue().getMessage());
-            s.append("\n");
+        author.setText(gameEvent.getAuthor());
+        message.setText(gameEvent.getMessage());
+        timestamp.setText(Helper.TIME_FORMATTER.format(gameEvent.getTimestampSentLong()));
+        switch (gameEvent.getType()) {
+            case SCORE:
+                showScoreEvent(view, gameEvent);
+                break;
+            case CHAT:
+                showChatEvent(view, gameEvent);
+                break;
+            case INFO:
+                showInfoEvent(view, gameEvent);
         }
-        textViewChatEvent.setText(s);
     }
 
-    
+    private void showScoreEvent(View view, GameEvent gameEvent) {
+        TextView info = (TextView) view.findViewById(R.id.text_view_info);
+        info.setText(gameEvent.getInfo());
+    }
 
+    private void showChatEvent(View view, GameEvent gameEvent) {
 
+    }
+
+    private void showInfoEvent(View view, GameEvent gameEvent) {
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        GameEvent model = this.getItem(position);
+        return model.getType().ordinal();
+    }
 }
