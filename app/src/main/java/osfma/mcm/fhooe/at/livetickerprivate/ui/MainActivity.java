@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -31,6 +32,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameCreate.GameCreateActivit
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail.GameDetailActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.GameListItemAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
+import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -40,6 +42,10 @@ public class MainActivity extends BaseActivity
     private Firebase mGamesListRef;
     private Firebase mUserRef;
     private ValueEventListener mUserRefListener;
+    private User mUser;
+    private TextView mAccountName, mAccountEmail;
+    private DrawerLayout mDrawerLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +98,11 @@ public class MainActivity extends BaseActivity
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
+                mUser = dataSnapshot.getValue(User.class);
+                if(mUser != null && (mAccountEmail != null && mAccountName != null)) {
+                    mAccountName.setText(mUser.getName());
+                    mAccountEmail.setText(mUser.getEmail());
+                }
             }
 
             @Override
@@ -186,10 +196,27 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        /*mAccountName = (TextView) findViewById(R.id.textView_account_name);
+        mAccountEmail = (TextView) findViewById(R.id.textView_account_email);
+        mAccountName.setText("fest");*/
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                /*TextView accountName = (TextView) findViewById(R.id.textView_account_name);
+                TextView accountEmail = (TextView) findViewById(R.id.textView_account_email);
+                accountName.setText(mUser.getName());
+                accountEmail.setText(Helper.decodeEmail(mUser.getEmail()));*/
+            }
+
+        };
+        mDrawerLayout.setDrawerListener(toggle);
+        /** Called when a drawer has settled in a completely open state. */
+
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -197,4 +224,5 @@ public class MainActivity extends BaseActivity
 
         mGamesView = (ListView) findViewById(R.id.listView_game_items);
     }
+
 }

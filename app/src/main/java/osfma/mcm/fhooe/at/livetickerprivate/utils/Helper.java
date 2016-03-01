@@ -23,6 +23,9 @@ public class Helper {
     public static String encodeEmail(String userEmail) {
         return userEmail.replace(".", ",");
     }
+    public static String decodeEmail(String userEmail) {
+        return userEmail.replace(",", ".");
+    }
 
     public static boolean checkIfOwner(Game game, String currentUserEmail) {
         return (game.getOwner() != null && game.getOwner().equals(currentUserEmail));

@@ -37,5 +37,7 @@ dependencies {
     /* For Google Play Services */
     compile 'com.google.android.gms:play-services-safetynet:8.3.0'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
+    /* For round Profile Pic */
+    compile 'de.hdodenhof:circleimageview:1.2.1'
 }
 
