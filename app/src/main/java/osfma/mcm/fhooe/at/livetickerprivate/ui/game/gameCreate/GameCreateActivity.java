@@ -11,10 +11,12 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TimePicker;
+import android.widget.ToggleButton;
 
 import com.firebase.client.Firebase;
 
@@ -34,6 +36,7 @@ public class GameCreateActivity extends BaseActivity {
     private EditText mTeam1, mTeam2, mDate, mTime;
     private DatePickerDialog mDatePickerDialog;
     private TimePickerDialog mTimePickerDialog;
+    private ToggleButton mTogglePrivacy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +102,9 @@ public class GameCreateActivity extends BaseActivity {
         mTime = (EditText) findViewById(R.id.editText_time);
         Button createGame = (Button) findViewById(R.id.button_create_game);
 
+        mTogglePrivacy = (ToggleButton) findViewById(R.id.toggleButton_privacy);
+
+
         createGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,14 +119,14 @@ public class GameCreateActivity extends BaseActivity {
             public void onClick(View v) {
                 mDatePickerDialog.show();
             }
-        });
-
-        mTime.setOnClickListener(new View.OnClickListener() {
+        });mTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mTimePickerDialog.show();
             }
         });
+
+
     }
 
 
@@ -131,6 +137,7 @@ public class GameCreateActivity extends BaseActivity {
         String sportType = mSportType.getSelectedItem().toString();
         String team1 = mTeam1.getText().toString();
         String team2 = mTeam2.getText().toString();
+        Boolean isPublic = mTogglePrivacy.isChecked();
         long dateAndTime = 0;
 
         try {
@@ -139,7 +146,7 @@ public class GameCreateActivity extends BaseActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Game newGame = new Game(sportType,team1,team2,dateAndTime,3,mEncodedEmail);
+        Game newGame = new Game(sportType,team1,team2,dateAndTime,3,mEncodedEmail,isPublic);
 
         ref.child(Constants.FIREBASE_LOCATION_GAMES).push().setValue(newGame);
 

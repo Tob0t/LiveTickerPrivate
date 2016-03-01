@@ -27,7 +27,6 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
 
     @Override
     protected void populateView(View view, Game game, int i) {
-
         TextView textViewGame = (TextView) view.findViewById(R.id.text_view_game);
         TextView textViewStateConcrete = (TextView) view.findViewById(R.id.text_view_state_concrete);
         TextView textViewDate = (TextView) view.findViewById(R.id.text_view_date);
@@ -39,7 +38,7 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
 
         // Format SetView
         StringBuffer s = new StringBuffer();
-        if(game.getGameSets() != null) {
+        if (game.getGameSets() != null) {
             Map<String, GameSet> treeMap = new TreeMap<String, GameSet>(game.getGameSets());
             for (Map.Entry<String, GameSet> entry : treeMap.entrySet()) {
                 s.append(entry.getValue().getScoreTeam1());
@@ -47,7 +46,7 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
                 s.append(entry.getValue().getScoreTeam2());
                 s.append(" | ");
             }
-            if(s != null) {
+            if (s != null) {
                 // remove the last |
                 textViewSets.setText(s.substring(0, s.length() - 3));
             }
@@ -56,16 +55,13 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
         // Format GameState
         String[] gameStates = view.getResources().getStringArray(R.array.game_states);
         String concreteState = gameStates[0];
-        if(game.isFinished()){
+        if (game.isFinished()) {
             concreteState = gameStates[2];
-        } else if(game.isStarted()){
+        } else if (game.isStarted()) {
             concreteState = gameStates[1];
         }
         textViewStateConcrete.setText(concreteState);
 
-        textViewGame.setText(game.getTeam1()+" vs. "+game.getTeam2());
-
-
-
+        textViewGame.setText(game.getTeam1() + " vs. " + game.getTeam2());
     }
 }

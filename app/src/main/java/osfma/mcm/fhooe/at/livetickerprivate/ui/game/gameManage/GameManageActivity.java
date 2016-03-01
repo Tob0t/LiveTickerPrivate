@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -27,16 +28,19 @@ import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
+import osfma.mcm.fhooe.at.livetickerprivate.model.User;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 
-public class GameManageActivity extends AppCompatActivity {
+public class GameManageActivity extends BaseActivity {
     private static final String LOG_TAG = GameManageActivity.class.getSimpleName();
     private Firebase mActiveGameRef;
     private Firebase mGamesEventsRef;
     private Firebase mActiveGameSetsRef;
     private Firebase mActiveGameActiveSetRef;
+    private Firebase mUserRef;
     private Firebase mLastChildAdded;
-    private ValueEventListener mActiveGameRefListener;
+    private ValueEventListener mActiveGameRefListener, mUserRefListener;
     private ChildEventListener mActiveGameSetsRefListener, mGamesEventsRefListener;
     private String mGameId;
     private TextView mTeam1NameTable;
@@ -51,6 +55,7 @@ public class GameManageActivity extends AppCompatActivity {
     private String mActiveGameSet;
     private int mNumberGameSets;
     private boolean mGameStarted;
+    private User mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,7 @@ public class GameManageActivity extends AppCompatActivity {
         mActiveGameRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
         mActiveGameSetsRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
+        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
         mActiveGameRefListener = mActiveGameRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -147,6 +153,20 @@ public class GameManageActivity extends AppCompatActivity {
             @Override
             public void onCancelled(FirebaseError firebaseError) {
 
+            }
+        });
+
+        mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mUser = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(LOG_TAG, getString(R.string.log_error_the_read_failed)
+                        + firebaseError.getMessage());
             }
         });
 
@@ -337,15 +357,15 @@ public class GameManageActivity extends AppCompatActivity {
         score.append(mTeam1PointsCurrent);
         score.append(":");
         score.append(mTeam2PointsCurrent);
-        mGamesEventsRef.push().setValue(new GameEvent(score.toString(),mCustomEvent.getText().toString(),"Admin",Constants.ItemType.SCORE));
+        mGamesEventsRef.push().setValue(new GameEvent(score.toString(), mCustomEvent.getText().toString(), mUser.getName(), Constants.ItemType.SCORE));
         mCustomEvent.setText("");
     }
 
     private void initializeScreen() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mTeam1PointsCurrent = mTeam2PointsCurrent = 0;
 
         mTeam1Name = (TextView) findViewById(R.id.textView_game_manage_team1);
@@ -406,11 +426,12 @@ public class GameManageActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         mActiveGameRef.removeEventListener(mActiveGameRefListener);
         mActiveGameSetsRef.removeEventListener(mActiveGameSetsRefListener);
         mGamesEventsRef.removeEventListener(mGamesEventsRefListener);
+        mUserRef.removeEventListener(mUserRefListener);
 
     }
 

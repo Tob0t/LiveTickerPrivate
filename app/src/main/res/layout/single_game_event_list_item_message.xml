@@ -23,7 +23,6 @@
                 android:paddingTop="5dp"
                 android:textStyle="bold"
                 android:textColor="@color/orange"
-                android:text="User1"
                 android:textSize="16sp" />
 
             <TextView
@@ -34,8 +33,7 @@
                 style="@style/chat_text_message_style"
                 android:paddingLeft="20dp"
                 android:autoLink="web"
-                android:maxWidth="280dp"
-                android:text="Rahul Agrawal is a good boy but he does not know what he wants." />
+                android:maxWidth="280dp" />
 
         </LinearLayout>
 
@@ -44,13 +42,13 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_alignBottom="@id/chat_company_reply_text"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="8dp"
             style="@style/chat_timings"
             android:paddingRight="10dp"
             android:textColor="@color/gray"
             android:paddingBottom="5dp"
             android:layout_toRightOf="@id/chat_company_reply_text"
-            android:text="17:10" />
+            android:text="" />
 
     </RelativeLayout>
 </RelativeLayout>

@@ -51,9 +51,14 @@ public class MainActivity extends BaseActivity
         mGamesListRef = new Firebase(Constants.FIREBASE_URL_GAMES);
         mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
-        // Order by Date and filter only future Events
-        Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
+        mGamesListRef.keepSynced(true);
 
+        // Order by Date and filter only future Events
+
+        //Query test = mGamesListRef.child("gamePublic").equalTo(true).orderByChild();
+        Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
+        //final Query gamesListRefQuery = mGamesListRef.orderByChild("gamePublic").equalTo(true);
+        //Query test = gamesListRefQuery.orderByChild("dateAndTime").startAt(new Date().getTime());
 
         initializeScreen();
 

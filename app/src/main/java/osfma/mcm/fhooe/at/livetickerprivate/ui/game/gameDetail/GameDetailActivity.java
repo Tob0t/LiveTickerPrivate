@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,6 +32,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
+import osfma.mcm.fhooe.at.livetickerprivate.model.User;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameManage.GameManageActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
@@ -41,17 +43,20 @@ public class GameDetailActivity extends BaseActivity {
     private Firebase mActiveGameRef;
     private Firebase mActiveGameSetsRef;
     private Firebase mGamesEventsRef;
+    private Firebase mUserRef;
     private String mGameId;
     private GameDetailListAdapter mGameDetailListAdapter;
-    private ValueEventListener mActiveGameRefListener;
-    private ChildEventListener mActiveGameSetsRefListener, mGamesEventsRefListener;
+    private ValueEventListener mActiveGameRefListener, mUserRefListener;;
+    private ChildEventListener mActiveGameSetsRefListener;
     private ListView mGameDetailListView;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
     private ArrayList<TextView> mTeam1PointsSets, mTeam2PointsSets;
     private TextView mTeam1NameTable;
     private TextView mTeam2NameTable;
+    private MenuItem mMenuItemManage;
     private ArrayList<TableRow> mSetTableRows;
     private TableRow mHeadline;
+    private User mUser;
     private boolean mCurrentUserIsOwner = false;
 
     @Override
@@ -74,8 +79,9 @@ public class GameDetailActivity extends BaseActivity {
         mActiveGameRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
         mActiveGameSetsRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
+        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
-
+        mActiveGameRef.keepSynced(true);
 
         initializeScreen();
 
@@ -104,6 +110,9 @@ public class GameDetailActivity extends BaseActivity {
 
                 /* Check if the current user is owner */
                 mCurrentUserIsOwner = Helper.checkIfOwner(game, mEncodedEmail);
+                if (mMenuItemManage != null){
+                    mMenuItemManage.setVisible(mCurrentUserIsOwner);
+                }
 
             }
 
@@ -138,6 +147,20 @@ public class GameDetailActivity extends BaseActivity {
             @Override
             public void onCancelled(FirebaseError firebaseError) {
 
+            }
+        });
+
+        mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mUser = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(LOG_TAG, getString(R.string.log_error_the_read_failed)
+                        + firebaseError.getMessage());
             }
         });
 
@@ -181,7 +204,6 @@ public class GameDetailActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mGameDetailListView = (ListView) findViewById(R.id.listView_game_events);
@@ -224,7 +246,7 @@ public class GameDetailActivity extends BaseActivity {
     }
 
     private void sendMessage(String message, View view) {
-        mGamesEventsRef.push().setValue(new GameEvent(message,"Anonymous", Constants.ItemType.CHAT));
+        mGamesEventsRef.push().setValue(new GameEvent(message,mUser.getEmail(), Constants.ItemType.CHAT));
     }
 
     @Override
@@ -234,9 +256,8 @@ public class GameDetailActivity extends BaseActivity {
         inflater.inflate(R.menu.menu_game_detail, menu);
 
         // set the manage button only visible if the user is owner
-        MenuItem manage = menu.findItem(R.id.action_manage_game);
-        manage.setVisible(mCurrentUserIsOwner);
-
+        mMenuItemManage = menu.findItem(R.id.action_manage_game);
+        mMenuItemManage.setVisible(mCurrentUserIsOwner);
         return true;
     }
 
@@ -253,15 +274,11 @@ public class GameDetailActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // TODO FIX Error
-        // Error because arrow button from ManageView guides to MainActivity and not DetailActivity
-        /*
+
         mGameDetailListAdapter.cleanup();
         mActiveGameRef.removeEventListener(mActiveGameRefListener);
-        mGamesEventsRef.removeEventListener(mGamesEventsRefListener);
         mActiveGameSetsRef.removeEventListener(mActiveGameSetsRefListener);
-        */
-
+        mUserRef.removeEventListener(mUserRefListener);
 
     }
 }
