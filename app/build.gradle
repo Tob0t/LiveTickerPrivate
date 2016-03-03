@@ -38,6 +38,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-safetynet:8.3.0'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
     /* For round Profile Pic */
-    compile 'de.hdodenhof:circleimageview:1.2.1'
+    compile 'com.makeramen:roundedimageview:2.2.1'
+    compile 'de.hdodenhof:circleimageview:2.0.0'
+    /* For loading Image-URL */
+    compile 'com.koushikdutta.ion:ion:2.+'
 }
 

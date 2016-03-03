@@ -4,14 +4,12 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -132,8 +130,7 @@ public class GameCreateActivity extends BaseActivity {
 
 
     private void createGame() {
-        // Get the reference to the root node in Firebase
-        Firebase ref = new Firebase(Constants.FIREBASE_URL);
+
         String sportType = mSportType.getSelectedItem().toString();
         String team1 = mTeam1.getText().toString();
         String team2 = mTeam2.getText().toString();
@@ -146,9 +143,16 @@ public class GameCreateActivity extends BaseActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Game newGame = new Game(sportType,team1,team2,dateAndTime,3,mEncodedEmail,isPublic);
+        Game newGame = new Game(sportType,team1,team2,dateAndTime,3,mEncodedEmail);
 
-        ref.child(Constants.FIREBASE_LOCATION_GAMES).push().setValue(newGame);
+        // Get the reference to the root node in Firebase
+        Firebase ref = new Firebase(Constants.FIREBASE_URL);
+        String gameType = Constants.FIREBASE_LOCATION_PRIVATE_GAMES;
+        if(isPublic){
+            gameType = Constants.FIREBASE_LOCATION_PUBLIC_GAMES;
+        }
+
+        ref.child(gameType).push().setValue(newGame);
 
     }
 

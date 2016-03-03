@@ -39,7 +39,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="@string/game_team1"
                     android:id="@+id/textView_game_manage_table_team1"
                     android:layout_column="0"
                     android:textAlignment="center" />
@@ -57,7 +56,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="@string/game_team2"
                     android:id="@+id/textView_game_manage_table_team2"
                     android:layout_column="2"
                     android:textAlignment="center" />
@@ -247,8 +245,7 @@
                     android:textSize="@dimen/card_game_detail"
                     android:textColor="@color/black"
                     android:gravity="center_vertical|center_horizontal"
-                    android:paddingLeft="2dp"
-                    android:text="@string/game_team1" />
+                    android:paddingLeft="2dp" />
                 <TextView
                     android:id="@+id/textView_game_manage_team1_points"
                     android:layout_width="0dp"
@@ -286,8 +283,7 @@
                     android:layout_weight="5"
                     android:textSize="@dimen/card_game_detail"
                     android:textColor="@color/black"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:text="@string/game_team2" />
+                    android:gravity="center_vertical|center_horizontal" />
 
             </LinearLayout>
 

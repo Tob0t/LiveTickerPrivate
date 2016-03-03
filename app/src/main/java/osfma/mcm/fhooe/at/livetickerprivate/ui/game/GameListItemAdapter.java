@@ -1,25 +1,32 @@
 package osfma.mcm.fhooe.at.livetickerprivate.ui.game;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
+import osfma.mcm.fhooe.at.livetickerprivate.model.User;
+import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
 /**
  * Created by Tob0t on 24.02.2016.
  */
 public class GameListItemAdapter extends FirebaseListAdapter<Game> {
+    private static final String LOG_TAG = GameListItemAdapter.class.getSimpleName();
     public GameListItemAdapter(Activity activity, Class<Game> modelClass, int modelLayout, Query ref) {
         super(activity, modelClass, modelLayout, ref);
         this.mActivity = activity;
@@ -27,14 +34,18 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
 
     @Override
     protected void populateView(View view, Game game, int i) {
-        TextView textViewGame = (TextView) view.findViewById(R.id.text_view_game);
-        TextView textViewStateConcrete = (TextView) view.findViewById(R.id.text_view_state_concrete);
-        TextView textViewDate = (TextView) view.findViewById(R.id.text_view_date);
-        TextView textViewTime = (TextView) view.findViewById(R.id.text_view_time);
-        TextView textViewSets = (TextView) view.findViewById(R.id.text_view_sets);
+        TextView textViewGame = (TextView) view.findViewById(R.id.textView_game);
+        TextView textViewStateConcrete = (TextView) view.findViewById(R.id.textView_state_concrete);
+        TextView textViewDate = (TextView) view.findViewById(R.id.textView_date);
+        TextView textViewTime = (TextView) view.findViewById(R.id.textView_time);
+        TextView textViewSets = (TextView) view.findViewById(R.id.textView_sets);
+        TextView textViewSportType = (TextView) view.findViewById(R.id.textView_sportType);
+        TextView textViewOwner = (TextView) view.findViewById(R.id.textView_owner);
 
         textViewDate.setText(Helper.DATE_FORMATTER.format(game.getDateAndTime()));
         textViewTime.setText(Helper.TIME_FORMATTER.format(game.getDateAndTime()));
+        setOwnerName(textViewOwner, game.getOwner());
+        textViewSportType.setText(game.getSportType());
 
         // Format SetView
         StringBuffer s = new StringBuffer();
@@ -63,5 +74,25 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
         textViewStateConcrete.setText(concreteState);
 
         textViewGame.setText(game.getTeam1() + " vs. " + game.getTeam2());
+    }
+
+    private void setOwnerName(final TextView textViewOwner, String authorEmail) {
+        Firebase userRef = new Firebase(Constants.FIREBASE_URL_USERS).child(authorEmail);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                if (user != null) {
+                    textViewOwner.setText(user.getName());
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(LOG_TAG, mActivity.getString(R.string.log_error_the_read_failed)
+                        + firebaseError.getMessage());
+            }
+        });
     }
 }

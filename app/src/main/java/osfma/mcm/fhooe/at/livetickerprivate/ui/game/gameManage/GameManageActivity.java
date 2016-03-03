@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +30,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
+import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
 public class GameManageActivity extends BaseActivity {
     private static final String LOG_TAG = GameManageActivity.class.getSimpleName();
@@ -56,6 +56,7 @@ public class GameManageActivity extends BaseActivity {
     private int mNumberGameSets;
     private boolean mGameStarted;
     private User mUser;
+    private Constants.GameType mGameType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,15 +70,17 @@ public class GameManageActivity extends BaseActivity {
          /* Get the push ID from the extra passed by ShoppingListFragment */
         Intent intent = this.getIntent();
         mGameId = intent.getStringExtra(Constants.KEY_LIST_ID);
+        mGameType = (Constants.GameType) intent.getSerializableExtra(Constants.KEY_GAME_TYPE);
         if (mGameId == null) {
             /* No point in continuing without a valid ID. */
             finish();
             return;
         }
 
-        mActiveGameRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId);
+        String gameType = Helper.checkGameType(mGameType);
+        mActiveGameRef = new Firebase(gameType).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
-        mActiveGameSetsRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
+        mActiveGameSetsRef = new Firebase(gameType).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
         mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
         mActiveGameRefListener = mActiveGameRef.addValueEventListener(new ValueEventListener() {

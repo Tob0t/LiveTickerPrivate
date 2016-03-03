@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -19,7 +17,6 @@ import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.databind.deser.Deserializers;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -58,6 +55,7 @@ public class GameDetailActivity extends BaseActivity {
     private TableRow mHeadline;
     private User mUser;
     private boolean mCurrentUserIsOwner = false;
+    private Constants.GameType mGameType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +65,7 @@ public class GameDetailActivity extends BaseActivity {
         /* Get the push ID from the extra passed by ShoppingListFragment */
         Intent intent = this.getIntent();
         mGameId = intent.getStringExtra(Constants.KEY_LIST_ID);
+        mGameType = (Constants.GameType) intent.getSerializableExtra(Constants.KEY_GAME_TYPE);
         if (mGameId == null) {
             /* No point in continuing without a valid ID. */
             finish();
@@ -76,9 +75,11 @@ public class GameDetailActivity extends BaseActivity {
         /**
          * Create Firebase references
          */
-        mActiveGameRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId);
+        String gameType = Helper.checkGameType(mGameType);
+
+        mActiveGameRef = new Firebase(gameType).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
-        mActiveGameSetsRef = new Firebase(Constants.FIREBASE_URL_GAMES).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
+        mActiveGameSetsRef = new Firebase(gameType).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
         mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
         mActiveGameRef.keepSynced(true);
@@ -266,6 +267,7 @@ public class GameDetailActivity extends BaseActivity {
         if(item.getItemId() == R.id.action_manage_game){
             Intent intent = new Intent(getApplicationContext(), GameManageActivity.class);
             intent.putExtra(Constants.KEY_LIST_ID, mGameId);
+            intent.putExtra(Constants.KEY_GAME_TYPE, mGameType);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);

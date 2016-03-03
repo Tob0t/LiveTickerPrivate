@@ -31,7 +31,7 @@ public class GameDetailListAdapter extends FirebaseListAdapterMultipleItems<Game
 
     @Override
     protected void populateView(View view, GameEvent gameEvent, int i) {
-        TextView author = (TextView) view.findViewById(R.id.text_view_author);
+        TextView author = (TextView) view.findViewById(R.id.text_view_owner);
         TextView message = (TextView) view.findViewById(R.id.text_view_message);
         TextView timestamp = (TextView) view.findViewById(R.id.text_view_timestamp);
 

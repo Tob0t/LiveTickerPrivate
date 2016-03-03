@@ -1,19 +1,23 @@
 package osfma.mcm.fhooe.at.livetickerprivate.ui;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,9 +26,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.koushikdutta.ion.Ion;
+import com.makeramen.roundedimageview.RoundedImageView;
 
+import java.net.URL;
 import java.util.Date;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
@@ -45,6 +53,7 @@ public class MainActivity extends BaseActivity
     private User mUser;
     private TextView mAccountName, mAccountEmail;
     private DrawerLayout mDrawerLayout;
+    private Constants.GameType mGameType;
 
 
     @Override
@@ -54,17 +63,14 @@ public class MainActivity extends BaseActivity
         /**
          * Create Firebase references
          */
-        mGamesListRef = new Firebase(Constants.FIREBASE_URL_GAMES);
+        mGamesListRef = new Firebase(Constants.FIREBASE_URL_PUBLIC_GAMES);
         mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
         mGamesListRef.keepSynced(true);
 
         // Order by Date and filter only future Events
 
-        //Query test = mGamesListRef.child("gamePublic").equalTo(true).orderByChild();
         Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
-        //final Query gamesListRefQuery = mGamesListRef.orderByChild("gamePublic").equalTo(true);
-        //Query test = gamesListRefQuery.orderByChild("dateAndTime").startAt(new Date().getTime());
 
         initializeScreen();
 
@@ -88,6 +94,7 @@ public class MainActivity extends BaseActivity
                      */
                     String listId = mGameListItemAdapter.getRef(position).getKey();
                     intent.putExtra(Constants.KEY_LIST_ID, listId);
+                    intent.putExtra(Constants.KEY_GAME_TYPE, mGameType);
                     /* Starts an activity showing the details for the selected list */
                     startActivity(intent);
                 }
@@ -99,10 +106,6 @@ public class MainActivity extends BaseActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mUser = dataSnapshot.getValue(User.class);
-                if(mUser != null && (mAccountEmail != null && mAccountName != null)) {
-                    mAccountName.setText(mUser.getName());
-                    mAccountEmail.setText(mUser.getEmail());
-                }
             }
 
             @Override
@@ -111,6 +114,7 @@ public class MainActivity extends BaseActivity
                         +firebaseError.getMessage());
             }
         });
+
     }
 
     @Override
@@ -148,29 +152,66 @@ public class MainActivity extends BaseActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        Fragment fragment = null;
+
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_public_games) {
+            mGameType = Constants.GameType.PUBLIC;
+            createAdapter(getQuery());
+        } else if (id == R.id.nav_private_games) {
+            mGameType = Constants.GameType.PRIVATE;
+            createAdapter(getQuery());
+        } else if (id == R.id.action_manage_account) {
+            createDialog();
+            return true;
         } else if (id == R.id.action_logout) {
             logout();
             return true;
         }
 
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    // TODO Improve
+    private void createDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
+        TextView name = (TextView) view.findViewById(R.id.edit_name_dialog);
+        name.setText(mUser.getName(),null);
+        builder.setView(view);
+        builder.create();
+        builder.show();
+
+    }
+
+    private Query getQuery() {
+        String title = "";
+        String gameType;
+        Query gamesListRefQuery = null;
+        if (mGameType == Constants.GameType.PUBLIC) {
+            title = this.getString(R.string.title_public_games);
+            gameType = Constants.FIREBASE_URL_PUBLIC_GAMES;
+            gamesListRefQuery = new Firebase(gameType).orderByChild("dateAndTime").startAt(new Date().getTime());
+        } else if(mGameType == Constants.GameType.PRIVATE){
+            title = this.getString(R.string.title_private_games);
+            gameType = Constants.FIREBASE_URL_PRIVATE_GAMES;
+            gamesListRefQuery = new Firebase(gameType).orderByChild("owner").equalTo(mEncodedEmail);
+        }
+        setTitle(title);
+
+        return gamesListRefQuery;
+    }
+    private void createAdapter(Query query){
+        if(query != null) {
+            mGameListItemAdapter = new GameListItemAdapter(this, Game.class,
+                    R.layout.single_game_list_item, query);
+            mGamesView.setAdapter(mGameListItemAdapter);
+        }
     }
 
     /**
@@ -197,20 +238,33 @@ public class MainActivity extends BaseActivity
         });
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        /*mAccountName = (TextView) findViewById(R.id.textView_account_name);
-        mAccountEmail = (TextView) findViewById(R.id.textView_account_email);
-        mAccountName.setText("fest");*/
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
+
+
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                /*TextView accountName = (TextView) findViewById(R.id.textView_account_name);
+                TextView accountName = (TextView) findViewById(R.id.textView_account_name);
                 TextView accountEmail = (TextView) findViewById(R.id.textView_account_email);
-                accountName.setText(mUser.getName());
-                accountEmail.setText(Helper.decodeEmail(mUser.getEmail()));*/
+                RoundedImageView profilePic = (RoundedImageView) findViewById(R.id.imageView_profilePic);
+                if(mUser != null) {
+                    accountName.setText(mUser.getName());
+                    accountEmail.setText(Helper.decodeEmail(mUser.getEmail()));
+                    /* Load Image URL with Ion */
+                    Ion.with(profilePic)
+                            .load(mUser.getProfileImageUrl());
+
+                    profilePic.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    profilePic.setCornerRadius((float) 10);
+                    profilePic.setBorderWidth((float) 2);
+                    profilePic.setBorderColor(Color.DKGRAY);
+                    profilePic.mutateBackground(true);
+                    profilePic.setOval(false);
+                    profilePic.setTileModeX(Shader.TileMode.REPEAT);
+                    profilePic.setTileModeY(Shader.TileMode.REPEAT);
+                }
             }
 
         };

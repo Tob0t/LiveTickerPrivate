@@ -9,14 +9,16 @@ public class User {
     private String name;
     private String email;
     private HashMap<String, Object> timestampJoined;
+    private String profileImageUrl;
 
     public User() {
     }
 
-    public User(String name, String email, HashMap<String, Object> timestampJoined) {
+    public User(String name, String email, HashMap<String, Object> timestampJoined, String profileImageUrl) {
         this.name = name;
         this.email = email;
         this.timestampJoined = timestampJoined;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getName() {
@@ -29,5 +31,9 @@ public class User {
 
     public HashMap<String, Object> getTimestampJoined() {
         return timestampJoined;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
     }
 }

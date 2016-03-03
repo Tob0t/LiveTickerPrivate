@@ -328,6 +328,7 @@ public class LoginActivity extends BaseActivity {
 
             /* Get username from authData */
         final String userName = (String) authData.getProviderData().get(Constants.PROVIDER_DATA_DISPLAY_NAME);
+        final String profileImageUrl = (String) authData.getProviderData().get(Constants.PROVIDER_DATA_PROFILE_IMAGE_URL);
 
             /* If no user exists, make a user */
         final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
@@ -339,7 +340,7 @@ public class LoginActivity extends BaseActivity {
                     HashMap<String, Object> timestampJoined = new HashMap<>();
                     timestampJoined.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
 
-                    User newUser = new User(userName, mEncodedEmail, timestampJoined);
+                    User newUser = new User(userName, mEncodedEmail, timestampJoined, profileImageUrl);
                     userLocation.setValue(newUser);
                 }
             }
