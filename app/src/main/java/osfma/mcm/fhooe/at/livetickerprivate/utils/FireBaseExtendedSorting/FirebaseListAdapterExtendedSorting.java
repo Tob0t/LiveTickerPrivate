@@ -1,4 +1,4 @@
-package osfma.mcm.fhooe.at.livetickerprivate.utils.FireBaseMultipleItems;
+package osfma.mcm.fhooe.at.livetickerprivate.utils.FireBaseExtendedSorting;
 
 /**
  * Created by Tob0t on 26.02.2016.
@@ -13,11 +13,11 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 
-public abstract class FirebaseListAdapterMultipleItems<T> extends BaseAdapter {
+public abstract class FirebaseListAdapterExtendedSorting<T> extends BaseAdapter {
     private final Class<T> mModelClass;
-    protected int[] mLayout;
+    protected int mLayout;
     protected Activity mActivity;
-    FirebaseArrayMultipleItems mSnapshots;
+    FirebaseArrayExtendedSorting mSnapshots;
 
 
     /**
@@ -28,12 +28,12 @@ public abstract class FirebaseListAdapterMultipleItems<T> extends BaseAdapter {
      * @param ref         The Firebase location to watch for data changes. Can also be a slice of a location, using some
      *                    combination of <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>,
      */
-    public FirebaseListAdapterMultipleItems(Activity activity, Class<T> modelClass, int[] modelLayout, Query ref) {
+    public FirebaseListAdapterExtendedSorting(Activity activity, Class<T> modelClass, int modelLayout, Query ref, String[] params) {
         mModelClass = modelClass;
         mLayout = modelLayout;
         mActivity = activity;
-        mSnapshots = new FirebaseArrayMultipleItems(ref);
-        mSnapshots.setOnChangedListener(new FirebaseArrayMultipleItems.OnChangedListener() {
+        this.mSnapshots = new FirebaseArrayExtendedSorting(ref, params);
+        this.mSnapshots.setOnChangedListener(new FirebaseArrayExtendedSorting.OnChangedListener() {
             @Override
             public void onChanged(EventType type, int index, int oldIndex) {
                 notifyDataSetChanged();
@@ -48,8 +48,8 @@ public abstract class FirebaseListAdapterMultipleItems<T> extends BaseAdapter {
      * @param ref         The Firebase location to watch for data changes. Can also be a slice of a location, using some
      *                    combination of <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>,
      */
-    public FirebaseListAdapterMultipleItems(Activity activity, Class<T> modelClass, int[] modelLayout, Firebase ref) {
-        this(activity, modelClass, modelLayout, (Query) ref);
+    public FirebaseListAdapterExtendedSorting(Activity activity, Class<T> modelClass, int modelLayout, Firebase ref, String[] params) {
+        this(activity, modelClass, modelLayout, (Query) ref, params);
     }
 
     public void cleanup() {
@@ -89,7 +89,7 @@ public abstract class FirebaseListAdapterMultipleItems<T> extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
         if (view == null) {
-            view = mActivity.getLayoutInflater().inflate(mLayout[getItemViewType(position)], viewGroup, false);
+            view = mActivity.getLayoutInflater().inflate(mLayout, viewGroup, false);
         }
 
         T model = getItem(position);
@@ -111,9 +111,4 @@ public abstract class FirebaseListAdapterMultipleItems<T> extends BaseAdapter {
      * @param position  The position in the list of the view being populated
      */
     abstract protected void populateView(View v, T model, int position);
-
-    @Override
-    public int getViewTypeCount() {
-        return mLayout.length;
-    }
 }

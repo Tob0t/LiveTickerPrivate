@@ -29,10 +29,11 @@ import com.firebase.client.ValueEventListener;
 import com.koushikdutta.ion.Ion;
 import com.makeramen.roundedimageview.RoundedImageView;
 
-import java.net.URL;
+import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
@@ -70,15 +71,22 @@ public class MainActivity extends BaseActivity
 
         // Order by Date and filter only future Events
 
-        Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
+        //Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
+        Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime");
 
         initializeScreen();
+
+
+        // Create new Filters
+        Map<Method, Boolean> filterMap = new HashMap<Method, Boolean>();
+        filterMap = Helper.addFilter(filterMap, Game.class, "isStarted", true);
+        filterMap = Helper.addFilter(filterMap, Game.class, "isFinished", false);
 
         /**
          * Setup the adapter
          */
         mGameListItemAdapter = new GameListItemAdapter(this, Game.class,
-                R.layout.single_game_list_item, gamesListRefQuery);
+                R.layout.single_game_list_item, gamesListRefQuery, filterMap);
         /* Create ActiveListItemAdapter and set to listView */
         mGamesView.setAdapter(mGameListItemAdapter);
 
@@ -157,12 +165,31 @@ public class MainActivity extends BaseActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        // Create new Filters
+        Map<Method, Boolean> filterMap = new HashMap<Method, Boolean>();
+
         if (id == R.id.nav_public_games) {
             mGameType = Constants.GameType.PUBLIC;
-            createAdapter(getQuery());
+            createAdapter(getQuery(), filterMap);
+        } else if (id == R.id.nav_public_games_running) {
+            mGameType = Constants.GameType.PUBLIC;
+            filterMap = new HashMap<Method, Boolean>();
+            filterMap = Helper.addFilter(filterMap, Game.class, "isStarted", true);
+            filterMap = Helper.addFilter(filterMap, Game.class, "isFinished", false);
+            createAdapter(getQuery(), filterMap);
+        } else if (id == R.id.nav_public_games_future) {
+            mGameType = Constants.GameType.PUBLIC;
+            filterMap = new HashMap<Method, Boolean>();
+            filterMap = Helper.addFilter(filterMap, Game.class, "isStarted", false);
+            createAdapter(getQuery(), filterMap);
+        } else if (id == R.id.nav_public_games_past) {
+            mGameType = Constants.GameType.PRIVATE;
+            filterMap = new HashMap<Method, Boolean>();
+            filterMap = Helper.addFilter(filterMap, Game.class, "isFinished", true);
+            createAdapter(getQuery(), filterMap);
         } else if (id == R.id.nav_private_games) {
             mGameType = Constants.GameType.PRIVATE;
-            createAdapter(getQuery());
+            createAdapter(getQuery(), filterMap);
         } else if (id == R.id.action_manage_account) {
             createDialog();
             return true;
@@ -196,7 +223,7 @@ public class MainActivity extends BaseActivity
         if (mGameType == Constants.GameType.PUBLIC) {
             title = this.getString(R.string.title_public_games);
             gameType = Constants.FIREBASE_URL_PUBLIC_GAMES;
-            gamesListRefQuery = new Firebase(gameType).orderByChild("dateAndTime").startAt(new Date().getTime());
+            gamesListRefQuery = new Firebase(gameType).orderByChild("dateAndTime");
         } else if(mGameType == Constants.GameType.PRIVATE){
             title = this.getString(R.string.title_private_games);
             gameType = Constants.FIREBASE_URL_PRIVATE_GAMES;
@@ -206,10 +233,10 @@ public class MainActivity extends BaseActivity
 
         return gamesListRefQuery;
     }
-    private void createAdapter(Query query){
+    private void createAdapter(Query query, Map<Method, Boolean> filterMap){
         if(query != null) {
             mGameListItemAdapter = new GameListItemAdapter(this, Game.class,
-                    R.layout.single_game_list_item, query);
+                    R.layout.single_game_list_item, query, filterMap);
             mGamesView.setAdapter(mGameListItemAdapter);
         }
     }

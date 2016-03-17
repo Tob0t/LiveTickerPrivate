@@ -14,7 +14,7 @@
     <TextView
         android:id="@+id/textView_game"
         style="@style/ListItemText"
-        android:text="schwerig hasnel vs heisi bussi"
+        android:text=""
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -24,7 +24,7 @@
         android:id="@+id/textView_sportType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Beachvolleyball"
+        android:text=""
         android:textColor="@color/black"
         android:textSize="@dimen/list_item_state"
         android:layout_centerVertical="true"
@@ -62,7 +62,7 @@
         android:layout_above="@+id/textView_sets"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:text="11-08-2016"
+        android:text=""
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"/>
 
@@ -72,7 +72,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/light_black"
         android:textSize="@dimen/list_item_state"
-        android:text="20:30"
+        android:text=""
         android:layout_alignTop="@+id/textView_sets"
         android:layout_alignRight="@+id/textView_date"
         android:layout_alignEnd="@+id/textView_date" />
@@ -82,7 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/light_black"
-        android:text="1:2 | 4:3"
+        android:text=""
         android:textSize="@dimen/list_item_state"
         android:layout_below="@+id/text_view_state"
         android:layout_alignLeft="@+id/text_view_state"
@@ -95,7 +95,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/light_black"
         android:textSize="@dimen/list_item_state"
-        android:text="Bernhard Metzger"
+        android:text=""
         android:layout_above="@+id/textView_date"
         android:layout_alignRight="@+id/textView_date"
         android:layout_alignEnd="@+id/textView_date" />

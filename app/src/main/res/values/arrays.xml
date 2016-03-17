@@ -7,7 +7,7 @@
     </string-array>
     <string-array name="game_states">
         <item>Game in future</item>
-        <item>Game in progress</item>
+        <item>Game running</item>
         <item>Game finished</item>
     </string-array>
 </resources>

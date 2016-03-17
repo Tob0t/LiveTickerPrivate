@@ -1,8 +1,5 @@
-package osfma.mcm.fhooe.at.livetickerprivate.utils.FireBaseMultipleItems;
+package osfma.mcm.fhooe.at.livetickerprivate.utils.FireBaseExtendedSorting;
 
-/**
- * Created by Tob0t on 26.02.2016.
- */
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
@@ -10,7 +7,12 @@ import com.firebase.client.Query;
 
 import java.util.ArrayList;
 
-public class FirebaseArrayMultipleItems implements ChildEventListener{
+import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
+
+/**
+ * Created by Tob0t on 03.03.2016.
+ */
+public class FirebaseArrayExtendedSorting implements ChildEventListener {
     public interface OnChangedListener {
         enum EventType { Added, Changed, Removed, Moved }
         void onChanged(EventType type, int index, int oldIndex);
@@ -19,11 +21,14 @@ public class FirebaseArrayMultipleItems implements ChildEventListener{
     private Query mQuery;
     private OnChangedListener mListener;
     private ArrayList<DataSnapshot> mSnapshots;
+    private String[] mParams;
+    private String mPreviousChildKey;
 
-    public FirebaseArrayMultipleItems(Query ref) {
+    public FirebaseArrayExtendedSorting(Query ref, String[] params) {
         mQuery = ref;
         mSnapshots = new ArrayList<DataSnapshot>();
         mQuery.addChildEventListener(this);
+        mParams = params;
     }
 
     public void cleanup() {
@@ -52,32 +57,55 @@ public class FirebaseArrayMultipleItems implements ChildEventListener{
 
     // Start of ChildEventListener methods
     public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
-        int index = 0;
-        if (previousChildKey != null) {
-            index = getIndexForKey(previousChildKey) + 1;
+        if(checkParamsEqual(snapshot)) {
+            int index = 0;
+            if (mPreviousChildKey != null) {
+                if(mSnapshots.size() >0) {
+                    index = getIndexForKey(mPreviousChildKey) + 1;
+                }
+            }
+            mPreviousChildKey = snapshot.getKey();
+            mSnapshots.add(index, snapshot);
+            notifyChangedListeners(OnChangedListener.EventType.Added, index);
         }
-        mSnapshots.add(index, snapshot);
-        notifyChangedListeners(OnChangedListener.EventType.Added, index);
+    }
+
+    private boolean checkParamsEqual(DataSnapshot snapshot) {
+        Game game = snapshot.getValue(Game.class);
+        if(game != null) {
+            if(game.isStarted()){
+                return true;
+            }
+        }
+        return false;
+        //return (snapshot.child("started").equals(true));
+        //return (mParams == null || (snapshot.child("started").equals(true)));
     }
 
     public void onChildChanged(DataSnapshot snapshot, String previousChildKey) {
-        int index = getIndexForKey(snapshot.getKey());
-        mSnapshots.set(index, snapshot);
-        notifyChangedListeners(OnChangedListener.EventType.Changed, index);
+        if(checkParamsEqual(snapshot)) {
+            int index = getIndexForKey(snapshot.getKey());
+            mSnapshots.set(index, snapshot);
+            notifyChangedListeners(OnChangedListener.EventType.Changed, index);
+        }
     }
 
     public void onChildRemoved(DataSnapshot snapshot) {
-        int index = getIndexForKey(snapshot.getKey());
-        mSnapshots.remove(index);
-        notifyChangedListeners(OnChangedListener.EventType.Removed, index);
+        if(checkParamsEqual(snapshot)) {
+            int index = getIndexForKey(snapshot.getKey());
+            mSnapshots.remove(index);
+            notifyChangedListeners(OnChangedListener.EventType.Removed, index);
+        }
     }
 
     public void onChildMoved(DataSnapshot snapshot, String previousChildKey) {
-        int oldIndex = getIndexForKey(snapshot.getKey());
-        mSnapshots.remove(oldIndex);
-        int newIndex = previousChildKey == null ? 0 : (getIndexForKey(previousChildKey) + 1);
-        mSnapshots.add(newIndex, snapshot);
-        notifyChangedListeners(OnChangedListener.EventType.Moved, newIndex, oldIndex);
+        if(checkParamsEqual(snapshot)) {
+            int oldIndex = getIndexForKey(snapshot.getKey());
+            mSnapshots.remove(oldIndex);
+            int newIndex = previousChildKey == null ? 0 : (getIndexForKey(previousChildKey) + 1);
+            mSnapshots.add(newIndex, snapshot);
+            notifyChangedListeners(OnChangedListener.EventType.Moved, newIndex, oldIndex);
+        }
     }
 
     public void onCancelled(FirebaseError firebaseError) {

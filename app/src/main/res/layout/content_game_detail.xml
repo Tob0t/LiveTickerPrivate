@@ -270,7 +270,8 @@
         android:src="@drawable/ic_menu_send"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/listView_game_events"
-        android:layout_alignEnd="@+id/listView_game_events" />
+        android:layout_alignEnd="@+id/listView_game_events"
+        android:visibility="invisible"/>
 
 
 </RelativeLayout>

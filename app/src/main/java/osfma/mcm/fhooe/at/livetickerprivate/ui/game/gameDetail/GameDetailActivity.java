@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -231,17 +233,43 @@ public class GameDetailActivity extends BaseActivity {
         mSetTableRows.add((TableRow) findViewById(R.id.tableRow_game_detail_set2));
         mSetTableRows.add((TableRow) findViewById(R.id.tableRow_game_detail_set3));
 
-        final EditText message = (EditText) findViewById(R.id.editText_chat);
+        final EditText messageBox = (EditText) findViewById(R.id.editText_chat);
+        final ImageButton buttonSendMessage = (ImageButton) findViewById(R.id.imageButton_send);
 
-        ImageButton ButtonSendMessage = (ImageButton) findViewById(R.id.imageButton_send);
-        ButtonSendMessage.setOnClickListener(new View.OnClickListener() {
+        // Hide send button if box is empty
+        messageBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() <= 0) {
+                    buttonSendMessage.setVisibility(View.INVISIBLE);
+                } else {
+                    buttonSendMessage.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+
+        buttonSendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(message.getText().toString(), v);
+                if (messageBox.length() > 0) {
+                    sendMessage(messageBox.getText().toString(), v);
+                }
                 // Hide keyboard
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(message.getWindowToken(), 0);
-                message.setText("");
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(messageBox.getWindowToken(), 0);
+                messageBox.setText("");
             }
         });
     }

@@ -7,8 +7,12 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
@@ -47,6 +51,38 @@ public class Helper {
             gameType = Constants.FIREBASE_URL_PRIVATE_GAMES;
         }
         return gameType;
+    }
+    // Using reflection for the filter parameters
+    public static Map<Method,Boolean> addFilter(Map<Method, Boolean> hashMap, Class className, String methodName, boolean valueParam) {
+
+        Method methodParam = null;
+        try {
+            methodParam = className.getMethod(methodName);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        hashMap.put(methodParam,valueParam);
+        return hashMap;
+    }
+
+    // iterate over all Filter Methods, if they are all true than inflate an icon
+    public static boolean checkAllCondtionsTrue(Object object, Map<Method, Boolean> mFilter) {
+        boolean allConditionsTrue = true;
+
+        for(Map.Entry<Method, Boolean> entry: mFilter.entrySet()) {
+            Method methodParam = entry.getKey();
+            boolean valueParam = entry.getValue();
+            try {
+                if((boolean) methodParam.invoke(object) != valueParam){
+                    allConditionsTrue = false;
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+        return allConditionsTrue;
     }
 
     /*public static HashMap<String, Object> updateGameSet

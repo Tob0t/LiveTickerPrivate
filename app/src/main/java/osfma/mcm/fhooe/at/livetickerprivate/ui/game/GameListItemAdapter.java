@@ -3,6 +3,7 @@ package osfma.mcm.fhooe.at.livetickerprivate.ui.game;
 import android.app.Activity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
@@ -12,6 +13,9 @@ import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,9 +31,12 @@ import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
  */
 public class GameListItemAdapter extends FirebaseListAdapter<Game> {
     private static final String LOG_TAG = GameListItemAdapter.class.getSimpleName();
-    public GameListItemAdapter(Activity activity, Class<Game> modelClass, int modelLayout, Query ref) {
+    private Map<Method, Boolean> mFilter;
+    public GameListItemAdapter(Activity activity, Class<Game> modelClass, int modelLayout, Query ref, Map<Method, Boolean> filter) {
         super(activity, modelClass, modelLayout, ref);
         this.mActivity = activity;
+        this.mLayout = modelLayout;
+        this.mFilter = filter;
     }
 
     @Override
@@ -94,5 +101,21 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
                         + firebaseError.getMessage());
             }
         });
+    }
+
+    @Override
+    public View getView(int position, View view, ViewGroup viewGroup) {
+
+        Game model = getItem(position);
+        boolean allConditionsTrue = Helper.checkAllCondtionsTrue(model, mFilter);
+        if(allConditionsTrue) {
+            view = mActivity.getLayoutInflater().inflate(mLayout, viewGroup, false);
+            populateView(view, model, position);
+        } else{
+            // Hack to hide view if its filteredblank item
+            view = new View(mActivity);
+        }
+
+        return view;
     }
 }

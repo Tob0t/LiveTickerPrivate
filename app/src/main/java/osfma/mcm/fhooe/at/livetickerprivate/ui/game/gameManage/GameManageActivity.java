@@ -6,10 +6,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -47,7 +50,7 @@ public class GameManageActivity extends BaseActivity {
     private ArrayList<TextView> mTeam1PointsSets, mTeam2PointsSets;
     private TextView mTeam2NameTable;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
-    private TextView mCustomEvent;
+    private EditText mCustomEvent;
     private Button mNextSet, mPrevSet;
     private ArrayList<TableRow> mSetTableRows;
     private TableRow mHeadline;
@@ -95,7 +98,7 @@ public class GameManageActivity extends BaseActivity {
 
                 mNumberGameSets = game.getGameSets().size();
 
-
+                mGameStarted = game.isStarted();
             }
 
             @Override
@@ -331,9 +334,10 @@ public class GameManageActivity extends BaseActivity {
     }
 
     private void initiateScoreUpdate(Constants.Team team, int unaryValue) {
-        // Set Game state to started if it isnt set yet
+        // Set Game state to started if it isn't set yet
         if(!mGameStarted){
             mGameStarted = true;
+            mGamesEventsRef.push().setValue(new GameEvent("Game is started!","Admin", Constants.ItemType.INFO));
             mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_STARTED).setValue(true);
             mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE).setValue(true);
         }
@@ -404,8 +408,8 @@ public class GameManageActivity extends BaseActivity {
         Button eventCut = (Button) findViewById(R.id.button_event_cut);
         Button eventRainbow = (Button) findViewById(R.id.button_event_rainbow);
 
-        ImageButton eventSend = (ImageButton) findViewById(R.id.button_send_event);
-        mCustomEvent = (TextView) findViewById(R.id.editText_manage_game_event);
+        final ImageButton eventSend = (ImageButton) findViewById(R.id.button_send_event);
+        mCustomEvent = (EditText) findViewById(R.id.editText_manage_game_event);
 
         mNextSet = (Button) findViewById(R.id.button_nextSet);
         mPrevSet = (Button) findViewById(R.id.button_prevSet);
@@ -426,6 +430,28 @@ public class GameManageActivity extends BaseActivity {
 
         mNextSet.setOnClickListener(onClickListener);
         mPrevSet.setOnClickListener(onClickListener);
+
+        // Hide send button if there box is empty
+        mCustomEvent.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() <= 0) {
+                    eventSend.setVisibility(View.INVISIBLE);
+                } else {
+                    eventSend.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     @Override

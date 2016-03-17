@@ -3,6 +3,7 @@ package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail;
 import android.app.Activity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
@@ -10,23 +11,26 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.firebase.ui.FirebaseListAdapter;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
-import osfma.mcm.fhooe.at.livetickerprivate.utils.FireBaseMultipleItems.FirebaseListAdapterMultipleItems;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
 /**
  * Created by Tob0t on 24.02.2016.
  */
-public class GameDetailListAdapter extends FirebaseListAdapterMultipleItems<GameEvent> {
+public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
     private static final String LOG_TAG = GameDetailListAdapter.class.getSimpleName();
+    protected int[] mLayout;
 
     public GameDetailListAdapter(Activity activity, Class<GameEvent> modelClass, int[] modelLayout, Query ref) {
-        super(activity, modelClass, modelLayout, ref);
+        super(activity, modelClass, modelLayout[0], ref);
         this.mActivity = activity;
+        this.mLayout = modelLayout;
+
     }
 
     @Override
@@ -89,5 +93,25 @@ public class GameDetailListAdapter extends FirebaseListAdapterMultipleItems<Game
     public int getItemViewType(int position) {
         GameEvent model = this.getItem(position);
         return model.getType().ordinal();
+    }
+
+    // Inflate different Layout depending on ItemViewType
+    @Override
+    public View getView(int position, View view, ViewGroup viewGroup) {
+        super.getView(position, view, viewGroup);
+        if (view == null) {
+            view = mActivity.getLayoutInflater().inflate(mLayout[getItemViewType(position)], viewGroup, false);
+        }
+
+        GameEvent model = getItem(position);
+
+        // Call out to subclass to marshall this model into the provided view
+        populateView(view, model, position);
+        return view;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return mLayout.length;
     }
 }
