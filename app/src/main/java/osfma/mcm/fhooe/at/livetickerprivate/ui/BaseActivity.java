@@ -154,4 +154,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
     }
+
+
 }

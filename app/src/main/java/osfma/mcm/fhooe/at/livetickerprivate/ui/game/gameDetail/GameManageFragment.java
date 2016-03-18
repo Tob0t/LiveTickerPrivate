@@ -1,15 +1,18 @@
-package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameManage;
+package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.Toolbar;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,12 +34,15 @@ import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
-public class GameManageActivity extends BaseActivity {
-    private static final String LOG_TAG = GameManageActivity.class.getSimpleName();
+/**
+ * Created by Tob0t on 17.03.2016.
+ */
+public class GameManageFragment extends Fragment {
+
+    private static final String LOG_TAG = GameManageFragment.class.getSimpleName();
     private Firebase mActiveGameRef;
     private Firebase mGamesEventsRef;
     private Firebase mActiveGameSetsRef;
@@ -60,25 +66,24 @@ public class GameManageActivity extends BaseActivity {
     private boolean mGameStarted;
     private User mUser;
     private Constants.GameType mGameType;
+    private String mEncodedEmail;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game_manage);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_game_manage, container, false);
 
         // some inital variables
         mActiveGameSet = Constants.GAMESET_ONE;
         mGameStarted = false;
 
          /* Get the push ID from the extra passed by ShoppingListFragment */
-        Intent intent = this.getIntent();
+        Intent intent = getActivity().getIntent();
         mGameId = intent.getStringExtra(Constants.KEY_LIST_ID);
         mGameType = (Constants.GameType) intent.getSerializableExtra(Constants.KEY_GAME_TYPE);
-        if (mGameId == null) {
-            /* No point in continuing without a valid ID. */
-            finish();
-            return;
-        }
+
+        // Get email from Activity
+        mEncodedEmail = ((GameDetailActivity)getActivity()).getmEncodedEmail();
 
         String gameType = Helper.checkGameType(mGameType);
         mActiveGameRef = new Firebase(gameType).child(mGameId);
@@ -176,7 +181,9 @@ public class GameManageActivity extends BaseActivity {
             }
         });
 
-        initializeScreen();
+        initializeScreen(rootView);
+
+        return rootView;
     }
 
     private void updateView(DataSnapshot dataSnapshot) {
@@ -281,7 +288,7 @@ public class GameManageActivity extends BaseActivity {
             if (mGameStarted) {
                 mLastChildAdded.child("info").setValue(message);
                 // Hide keyboard
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(mCustomEvent.getWindowToken(), 0);
                 mCustomEvent.setText("");
             } else {
@@ -313,7 +320,7 @@ public class GameManageActivity extends BaseActivity {
             }
             updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE, true);
             mActiveGameSetsRef.updateChildren(updatedGameSets);
-       }
+        }
     };
 
 
@@ -368,53 +375,50 @@ public class GameManageActivity extends BaseActivity {
         mCustomEvent.setText("");
     }
 
-    private void initializeScreen() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    private void initializeScreen(View rootView) {
 
         mTeam1PointsCurrent = mTeam2PointsCurrent = 0;
 
-        mTeam1Name = (TextView) findViewById(R.id.textView_game_manage_team1);
-        mTeam1Points = (TextView) findViewById(R.id.textView_game_manage_team1_points);
-        mTeam2Name = (TextView) findViewById(R.id.textView_game_manage_team2);
-        mTeam2Points = (TextView) findViewById(R.id.textView_game_manage_team2_points);
+        mTeam1Name = (TextView) rootView.findViewById(R.id.textView_game_manage_team1);
+        mTeam1Points = (TextView) rootView.findViewById(R.id.textView_game_manage_team1_points);
+        mTeam2Name = (TextView) rootView.findViewById(R.id.textView_game_manage_team2);
+        mTeam2Points = (TextView) rootView.findViewById(R.id.textView_game_manage_team2_points);
 
-        mTeam1NameTable = (TextView) findViewById(R.id.textView_game_manage_table_team1);
+        mTeam1NameTable = (TextView) rootView.findViewById(R.id.textView_game_manage_table_team1);
         mTeam1PointsSets = new ArrayList<TextView>();
-        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team1_set1));
-        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team1_set2));
-        mTeam1PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team1_set3));
+        mTeam1PointsSets.add((TextView) rootView.findViewById(R.id.textView_game_manage_table_team1_set1));
+        mTeam1PointsSets.add((TextView) rootView.findViewById(R.id.textView_game_manage_table_team1_set2));
+        mTeam1PointsSets.add((TextView) rootView.findViewById(R.id.textView_game_manage_table_team1_set3));
 
-        mTeam2NameTable = (TextView) findViewById(R.id.textView_game_manage_table_team2);
+        mTeam2NameTable = (TextView) rootView.findViewById(R.id.textView_game_manage_table_team2);
         mTeam2PointsSets = new ArrayList<TextView>();
-        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set1));
-        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set2));
-        mTeam2PointsSets.add((TextView) findViewById(R.id.textView_game_manage_table_team2_set3));
+        mTeam2PointsSets.add((TextView) rootView.findViewById(R.id.textView_game_manage_table_team2_set1));
+        mTeam2PointsSets.add((TextView) rootView.findViewById(R.id.textView_game_manage_table_team2_set2));
+        mTeam2PointsSets.add((TextView) rootView.findViewById(R.id.textView_game_manage_table_team2_set3));
 
         mSetTableRows = new ArrayList<TableRow>();
-        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set1));
-        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set2));
-        mSetTableRows.add((TableRow) findViewById(R.id.tableRow_manage_game_set3));
+        mSetTableRows.add((TableRow) rootView.findViewById(R.id.tableRow_manage_game_set1));
+        mSetTableRows.add((TableRow) rootView.findViewById(R.id.tableRow_manage_game_set2));
+        mSetTableRows.add((TableRow) rootView.findViewById(R.id.tableRow_manage_game_set3));
 
-        Button incrementTeam1 = (Button) findViewById(R.id.button_increment_team1);
-        Button incrementTeam2 = (Button) findViewById(R.id.button_increment_team2);
-        Button decrementTeam1 = (Button) findViewById(R.id.button_decrement_team1);
-        Button decrementTeam2 = (Button) findViewById(R.id.button_decrement_team2);
+        Button incrementTeam1 = (Button) rootView.findViewById(R.id.button_increment_team1);
+        Button incrementTeam2 = (Button) rootView.findViewById(R.id.button_increment_team2);
+        Button decrementTeam1 = (Button) rootView.findViewById(R.id.button_decrement_team1);
+        Button decrementTeam2 = (Button) rootView.findViewById(R.id.button_decrement_team2);
 
-        Button eventAce = (Button) findViewById(R.id.button_event_ace);
-        Button eventBlock = (Button) findViewById(R.id.button_event_block);
-        Button eventLine = (Button) findViewById(R.id.button_event_lineshot);
-        Button eventCut = (Button) findViewById(R.id.button_event_cut);
-        Button eventRainbow = (Button) findViewById(R.id.button_event_rainbow);
+        Button eventAce = (Button) rootView.findViewById(R.id.button_event_ace);
+        Button eventBlock = (Button) rootView.findViewById(R.id.button_event_block);
+        Button eventLine = (Button) rootView.findViewById(R.id.button_event_lineshot);
+        Button eventCut = (Button) rootView.findViewById(R.id.button_event_cut);
+        Button eventRainbow = (Button) rootView.findViewById(R.id.button_event_rainbow);
 
-        final ImageButton eventSend = (ImageButton) findViewById(R.id.button_send_event);
-        mCustomEvent = (EditText) findViewById(R.id.editText_manage_game_event);
+        final ImageButton eventSend = (ImageButton) rootView.findViewById(R.id.button_send_event);
+        mCustomEvent = (EditText) rootView.findViewById(R.id.editText_manage_game_event);
 
-        mNextSet = (Button) findViewById(R.id.button_nextSet);
-        mPrevSet = (Button) findViewById(R.id.button_prevSet);
+        mNextSet = (Button) rootView.findViewById(R.id.button_nextSet);
+        mPrevSet = (Button) rootView.findViewById(R.id.button_prevSet);
 
-        Button finishGame = (Button) findViewById(R.id.button_finish_game);
+        Button finishGame = (Button) rootView.findViewById(R.id.button_finish_game);
 
         incrementTeam1.setOnClickListener(onClickListener);
         incrementTeam2.setOnClickListener(onClickListener);

@@ -1,4 +1,4 @@
-package osfma.mcm.fhooe.at.livetickerprivate.ui.game;
+package osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter;
 
 import android.app.Activity;
 import android.util.Log;
@@ -13,9 +13,7 @@ import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 

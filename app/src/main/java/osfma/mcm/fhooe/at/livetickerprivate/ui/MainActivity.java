@@ -6,8 +6,11 @@ import android.graphics.Shader;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -30,29 +33,27 @@ import com.koushikdutta.ion.Ion;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.lang.reflect.Method;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameDetailTabsPagerAdapter;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameTabsPagerAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameCreate.GameCreateActivity;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameListItemAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail.GameDetailActivity;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.GameListItemAdapter;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gamesList.GamesFragment;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-    private ListView mGamesView;
-    private GameListItemAdapter mGameListItemAdapter;
-    private Firebase mGamesListRef;
     private Firebase mUserRef;
     private ValueEventListener mUserRefListener;
     private User mUser;
-    private TextView mAccountName, mAccountEmail;
     private DrawerLayout mDrawerLayout;
     private Constants.GameType mGameType;
 
@@ -61,53 +62,16 @@ public class MainActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Initial Value
+        mGameType = Constants.GameType.PUBLIC;
+
         /**
          * Create Firebase references
          */
-        mGamesListRef = new Firebase(Constants.FIREBASE_URL_PUBLIC_GAMES);
         mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
-        mGamesListRef.keepSynced(true);
-
-        // Order by Date and filter only future Events
-
-        //Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime").startAt(new Date().getTime());
-        Query gamesListRefQuery = mGamesListRef.orderByChild("dateAndTime");
-
         initializeScreen();
-
-
-        // Create new Filters
-        Map<Method, Boolean> filterMap = new HashMap<Method, Boolean>();
-        filterMap = Helper.addFilter(filterMap, Game.class, "isStarted", true);
-        filterMap = Helper.addFilter(filterMap, Game.class, "isFinished", false);
-
-        /**
-         * Setup the adapter
-         */
-        mGameListItemAdapter = new GameListItemAdapter(this, Game.class,
-                R.layout.single_game_list_item, gamesListRefQuery, filterMap);
-        /* Create ActiveListItemAdapter and set to listView */
-        mGamesView.setAdapter(mGameListItemAdapter);
-
-
-        mGamesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Game selectedGame = mGameListItemAdapter.getItem(position);
-                if (selectedGame != null) {
-                    Intent intent = new Intent(getApplicationContext(), GameDetailActivity.class);
-                    /* Get the list ID using the adapter's get ref method to get the Firebase
-                     * ref and then grab the key.
-                     */
-                    String listId = mGameListItemAdapter.getRef(position).getKey();
-                    intent.putExtra(Constants.KEY_LIST_ID, listId);
-                    intent.putExtra(Constants.KEY_GAME_TYPE, mGameType);
-                    /* Starts an activity showing the details for the selected list */
-                    startActivity(intent);
-                }
-            }
-        });
 
         mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
 
@@ -170,26 +134,12 @@ public class MainActivity extends BaseActivity
 
         if (id == R.id.nav_public_games) {
             mGameType = Constants.GameType.PUBLIC;
-            createAdapter(getQuery(), filterMap);
-        } else if (id == R.id.nav_public_games_running) {
-            mGameType = Constants.GameType.PUBLIC;
-            filterMap = new HashMap<Method, Boolean>();
-            filterMap = Helper.addFilter(filterMap, Game.class, "isStarted", true);
-            filterMap = Helper.addFilter(filterMap, Game.class, "isFinished", false);
-            createAdapter(getQuery(), filterMap);
-        } else if (id == R.id.nav_public_games_future) {
-            mGameType = Constants.GameType.PUBLIC;
-            filterMap = new HashMap<Method, Boolean>();
-            filterMap = Helper.addFilter(filterMap, Game.class, "isStarted", false);
-            createAdapter(getQuery(), filterMap);
-        } else if (id == R.id.nav_public_games_past) {
-            mGameType = Constants.GameType.PRIVATE;
-            filterMap = new HashMap<Method, Boolean>();
-            filterMap = Helper.addFilter(filterMap, Game.class, "isFinished", true);
-            createAdapter(getQuery(), filterMap);
+            setTitle(this.getString(R.string.title_public_games));
+            updateGameType();
         } else if (id == R.id.nav_private_games) {
             mGameType = Constants.GameType.PRIVATE;
-            createAdapter(getQuery(), filterMap);
+            setTitle(this.getString(R.string.title_private_games));
+            updateGameType();
         } else if (id == R.id.action_manage_account) {
             createDialog();
             return true;
@@ -198,10 +148,20 @@ public class MainActivity extends BaseActivity
             return true;
         }
 
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void updateGameType() {
+        GamesFragment gamesFragment = (GamesFragment) getSupportFragmentManager().findFragmentById(R.id.pager);
+        gamesFragment.updateGameType(mGameType, mEncodedEmail);
+    }
+    public Constants.GameType getGameType(){
+        return mGameType;
+    }
+    public String getmEncodedEmail() {
+        return mEncodedEmail;
     }
 
     // TODO Improve
@@ -216,38 +176,13 @@ public class MainActivity extends BaseActivity
 
     }
 
-    private Query getQuery() {
-        String title = "";
-        String gameType;
-        Query gamesListRefQuery = null;
-        if (mGameType == Constants.GameType.PUBLIC) {
-            title = this.getString(R.string.title_public_games);
-            gameType = Constants.FIREBASE_URL_PUBLIC_GAMES;
-            gamesListRefQuery = new Firebase(gameType).orderByChild("dateAndTime");
-        } else if(mGameType == Constants.GameType.PRIVATE){
-            title = this.getString(R.string.title_private_games);
-            gameType = Constants.FIREBASE_URL_PRIVATE_GAMES;
-            gamesListRefQuery = new Firebase(gameType).orderByChild("owner").equalTo(mEncodedEmail);
-        }
-        setTitle(title);
-
-        return gamesListRefQuery;
-    }
-    private void createAdapter(Query query, Map<Method, Boolean> filterMap){
-        if(query != null) {
-            mGameListItemAdapter = new GameListItemAdapter(this, Game.class,
-                    R.layout.single_game_list_item, query, filterMap);
-            mGamesView.setAdapter(mGameListItemAdapter);
-        }
-    }
-
     /**
      * Cleanup when the activity is destroyed.
      */
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mGameListItemAdapter.cleanup();
+        //mGameListItemAdapter.cleanup();
         mUserRef.removeEventListener(mUserRefListener);
     }
 
@@ -303,7 +238,35 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mGamesView = (ListView) findViewById(R.id.listView_game_items);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_RUNNING));
+        tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_FUTURE));
+        tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_PAST));
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+        final GameTabsPagerAdapter adapter = new GameTabsPagerAdapter
+                (getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
     }
+
 
 }

@@ -3,9 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.gameListDetails.GameDetailActivity">
     <item
-        android:id="@+id/action_manage_game"
-        android:icon="@drawable/ic_menu_manage"
+        android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:title="@string/manage_game"
-        app:showAsAction="always" />
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
     </menu>

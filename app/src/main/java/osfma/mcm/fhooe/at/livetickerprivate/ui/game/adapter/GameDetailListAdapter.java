@@ -1,4 +1,4 @@
-package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail;
+package osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter;
 
 import android.app.Activity;
 import android.util.Log;
