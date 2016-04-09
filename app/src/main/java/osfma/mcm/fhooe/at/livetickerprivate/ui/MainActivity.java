@@ -56,6 +56,7 @@ public class MainActivity extends BaseActivity
     private User mUser;
     private DrawerLayout mDrawerLayout;
     private Constants.GameType mGameType;
+    private ViewPager mViewPager;
 
 
     @Override
@@ -65,6 +66,7 @@ public class MainActivity extends BaseActivity
 
         // Initial Value
         mGameType = Constants.GameType.PUBLIC;
+        setTitle(this.getString(R.string.title_public_games));
 
         /**
          * Create Firebase references
@@ -106,20 +108,6 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -154,8 +142,12 @@ public class MainActivity extends BaseActivity
     }
 
     private void updateGameType() {
-        GamesFragment gamesFragment = (GamesFragment) getSupportFragmentManager().findFragmentById(R.id.pager);
-        gamesFragment.updateGameType(mGameType, mEncodedEmail);
+        // update all fragments if the GameType is changed
+        for(Fragment f :getSupportFragmentManager().getFragments()){
+            if(f instanceof  GamesFragment){
+                ((GamesFragment) f).updateGameType(mGameType, mEncodedEmail);
+            }
+        }
     }
     public Constants.GameType getGameType(){
         return mGameType;
@@ -244,15 +236,15 @@ public class MainActivity extends BaseActivity
         tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_PAST));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = (ViewPager) findViewById(R.id.pager);
         final GameTabsPagerAdapter adapter = new GameTabsPagerAdapter
                 (getSupportFragmentManager(), tabLayout.getTabCount());
-        viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        mViewPager.setAdapter(adapter);
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
+                mViewPager.setCurrentItem(tab.getPosition());
             }
 
             @Override

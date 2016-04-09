@@ -34,6 +34,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.MainActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameDetailListAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
@@ -48,7 +49,7 @@ public class GameWatchFragment extends Fragment{
     private Firebase mGamesEventsRef;
     private Firebase mUserRef;
     private GameDetailListAdapter mGameDetailListAdapter;
-    private ValueEventListener mActiveGameRefListener, mUserRefListener;;
+    private ValueEventListener mActiveGameRefListener, mUserRefListener;
     private ChildEventListener mActiveGameSetsRefListener;
     private ListView mGameDetailListView;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
@@ -67,7 +68,7 @@ public class GameWatchFragment extends Fragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_game_watch, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_game_watch, container, false);
 
          /* Get the push ID from the extra passed by MainActivity */
         Intent intent = getActivity().getIntent();
@@ -107,16 +108,22 @@ public class GameWatchFragment extends Fragment{
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Game game = dataSnapshot.getValue(Game.class);
-                mTeam1Name.setText(game.getTeam1());
-                mTeam2Name.setText(game.getTeam2());
+                if(game != null) {
+                    mTeam1Name.setText(game.getTeam1());
+                    mTeam2Name.setText(game.getTeam2());
 
-                mTeam1NameTable.setText(game.getTeam1());
-                mTeam2NameTable.setText(game.getTeam2());
+                    mTeam1NameTable.setText(game.getTeam1());
+                    mTeam2NameTable.setText(game.getTeam2());
 
-                /* Check if the current user is owner */
-                mCurrentUserIsOwner = Helper.checkIfOwner(game, mEncodedEmail);
-                if (mMenuItemManage != null) {
-                    mMenuItemManage.setVisible(mCurrentUserIsOwner);
+                    /* Check if the current user is owner */
+                    mCurrentUserIsOwner = Helper.checkIfOwner(game, mEncodedEmail);
+                    if (mMenuItemManage != null) {
+                        mMenuItemManage.setVisible(mCurrentUserIsOwner);
+                    }
+                } else{
+                    Helper.showToast(getActivity(), rootView.getResources().getString(R.string.game_deleted));
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
                 }
 
             }
@@ -159,7 +166,9 @@ public class GameWatchFragment extends Fragment{
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mUser = dataSnapshot.getValue(User.class);
+                if(dataSnapshot != null) {
+                    mUser = dataSnapshot.getValue(User.class);
+                }
             }
 
             @Override

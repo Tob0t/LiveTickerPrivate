@@ -22,7 +22,7 @@
                 android:paddingRight="8dp"
                 android:paddingTop="5dp"
                 android:textStyle="bold"
-                android:textColor="@color/orange"
+                android:textColor="@color/holo_blue"
                 android:textSize="16sp" />
 
             <TextView

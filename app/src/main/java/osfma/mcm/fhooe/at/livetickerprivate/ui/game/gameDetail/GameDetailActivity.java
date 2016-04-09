@@ -18,6 +18,7 @@ import com.firebase.client.ValueEventListener;
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.MainActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameDetailTabsPagerAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
@@ -49,19 +50,24 @@ public class GameDetailActivity extends BaseActivity {
 
         Firebase activeGameRef = new Firebase(gameType).child(mGameId);
 
-        activeGameRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Game game = dataSnapshot.getValue(Game.class);
-                mGameOwner = game.getOwner();
-                setupLayout();
-            }
+        if(activeGameRef != null) {
+            activeGameRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Game game = dataSnapshot.getValue(Game.class);
+                    mGameOwner = game.getOwner();
+                    setupLayout();
+                }
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
 
-            }
-        });
+                }
+            });
+        } else{
+            intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -108,16 +114,6 @@ public class GameDetailActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_game_detail, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public String getmEncodedEmail() {

@@ -1,8 +1,6 @@
 package osfma.mcm.fhooe.at.livetickerprivate.ui.login;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -19,7 +16,6 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +32,7 @@ public class CreateAccountActivity extends BaseActivity {
     private Firebase mFirebaseRef;
     private EditText mEditTextUsernameCreate, mEditTextEmailCreate, mEditTextPasswordCreate;
     private String mUserEmail, mPassword, mUserName;
+    private int mUserId;
     private SecureRandom mRandom = new SecureRandom();
 
     @Override
@@ -51,6 +48,7 @@ public class CreateAccountActivity extends BaseActivity {
     public void initializeScreen() {
         mEditTextUsernameCreate = (EditText) findViewById(R.id.edit_text_username_create);
         mEditTextEmailCreate = (EditText) findViewById(R.id.edit_text_email_create);
+        mEditTextPasswordCreate = (EditText) findViewById(R.id.edit_text_password_create);
 
     /* Setup the progress dialog that is displayed later when authenticating with Firebase */
         mAuthProgressDialog = new ProgressDialog(this);
@@ -75,14 +73,15 @@ public class CreateAccountActivity extends BaseActivity {
     public void onCreateAccountPressed(View view) {
         mUserName = mEditTextUsernameCreate.getText().toString();
         mUserEmail = mEditTextEmailCreate.getText().toString().toLowerCase();
-        mPassword = new BigInteger(130, mRandom).toString(32);
+        mPassword = mEditTextPasswordCreate.getText().toString();
 
         /**
          * Check that email and user name are okay
          */
         boolean validEmail = isEmailValid(mUserEmail);
         boolean validUserName = isUserNameValid(mUserName);
-        if (!validEmail || !validUserName ) return;
+        boolean validPassword = isPasswordValid(mPassword);
+        if (!validEmail || !validUserName || !validPassword) return;
 
         /**
          * If everything was valid show the progress dialog to indicate that
@@ -100,67 +99,23 @@ public class CreateAccountActivity extends BaseActivity {
                 mAuthProgressDialog.dismiss();
                 Log.i(LOG_TAG, getString(R.string.log_message_auth_successful));
 
-                mFirebaseRef.resetPassword(mUserEmail, new Firebase.ResultHandler() {
-                    @Override
-                    public void onSuccess() {
-                        mAuthProgressDialog.dismiss();
-                        Log.i(LOG_TAG, getString(R.string.log_message_auth_successful));
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(CreateAccountActivity.this);
+                SharedPreferences.Editor spe = sp.edit();
 
+                /**
+                 * Save name and email to sharedPreferences to create User database record
+                 * when the registered user will sign in for the first time
+                 */
+                spe.putString(Constants.KEY_SIGNUP_EMAIL, mUserEmail).apply();
 
-                        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(CreateAccountActivity.this);
-                        SharedPreferences.Editor spe = sp.edit();
+                createUserInFirebaseHelper();
 
-                        /**
-                         * Save name and email to sharedPreferences to create User database record
-                         * when the registered user will sign in for the first time
-                         */
-                        spe.putString(Constants.KEY_SIGNUP_EMAIL, mUserEmail).apply();
+                showToast(getResources().getString(R.string.user_created_successfully));
 
-                        createUserInFirebaseHelper();
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(CreateAccountActivity.this);
-                        builder.setMessage(R.string.dialog_message)
-                                .setTitle(R.string.dialog_title);
-
-
-                        // Add the buttons
-                        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                /**
-                                 *  Password reset email sent, open app chooser to pick app
-                                 *  for handling inbox email intent
-                                 */
-                                Intent intent = new Intent(Intent.ACTION_MAIN);
-                                intent.addCategory(Intent.CATEGORY_APP_EMAIL);
-                                try {
-                                    startActivity(intent);
-                                    finish();
-                                } catch (android.content.ActivityNotFoundException ex) {
-                                    /* User does not have any app to handle email */
-                                }
-                            }
-                        });
-                        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                            }
-                        });
-
-                        // Create the AlertDialog
-                        AlertDialog dialog = builder.create();
-
-                        // show dialog
-                        dialog.show();
-                    }
-
-                    @Override
-                    public void onError(FirebaseError firebaseError) {
-                        /* Error occurred, log the error and dismiss the progress dialog */
-                        Log.d(LOG_TAG, getString(R.string.log_error_occurred) +
-                                firebaseError);
-                        mAuthProgressDialog.dismiss();
-                    }
-                });
+                Intent intent = new Intent(CreateAccountActivity.this, LoginActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
 
             @Override
@@ -169,17 +124,14 @@ public class CreateAccountActivity extends BaseActivity {
                 Log.d(LOG_TAG, getString(R.string.log_error_occurred) +
                         firebaseError);
                 mAuthProgressDialog.dismiss();
-                /* Display the appropriate error message */
+               /* Display the appropriate error message */
                 if (firebaseError.getCode() == FirebaseError.EMAIL_TAKEN) {
                     mEditTextEmailCreate.setError(getString(R.string.error_email_taken));
                 } else {
-                    showErrorToast(firebaseError.getMessage());
+                    showToast(firebaseError.getMessage());
                 }
-
             }
         });
-
-
     }
 
     /**
@@ -198,7 +150,7 @@ public class CreateAccountActivity extends BaseActivity {
                     HashMap<String, Object> timestampJoined = new HashMap<>();
                     timestampJoined.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
 
-                    User newUser = new User(mUserName, encodedEmail, timestampJoined,"");
+                    User newUser = new User(mUserName, encodedEmail, timestampJoined, "");
                     userLocation.setValue(newUser);
                 }
             }
@@ -230,10 +182,18 @@ public class CreateAccountActivity extends BaseActivity {
         return true;
     }
 
+    private boolean isPasswordValid(String password) {
+        if (password.length() < 6) {
+            mEditTextPasswordCreate.setError(getResources().getString(R.string.error_invalid_password_not_valid));
+            return false;
+        }
+        return true;
+    }
+
     /**
-     * Show error toast to users
+     * Show toast msg to users
      */
-    private void showErrorToast(String message) {
+    private void showToast(String message) {
         Toast.makeText(CreateAccountActivity.this, message, Toast.LENGTH_LONG).show();
     }
 }

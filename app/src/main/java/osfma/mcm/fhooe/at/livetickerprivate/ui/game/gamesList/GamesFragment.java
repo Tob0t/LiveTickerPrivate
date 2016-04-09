@@ -35,7 +35,6 @@ public class GamesFragment extends Fragment {
     private Firebase mGamesListRef;
     private Constants.GameType mGameType;
     private String mGameState;
-    private String mEncodedEmail;
 
     @Nullable
     @Override
@@ -46,20 +45,10 @@ public class GamesFragment extends Fragment {
         Bundle bundle = this.getArguments();
         mGameState = bundle.getString(Constants.GAME_STATE);
         mGameType = ((MainActivity) getActivity()).getGameType();
-        mEncodedEmail = ((MainActivity)getActivity()).getmEncodedEmail();
+        String encodedEmail = ((MainActivity)getActivity()).getmEncodedEmail();
 
-        String gameTypeUrl ="";
-        Query gamesListRefQuery = null;
-
-        if (mGameType == Constants.GameType.PUBLIC) {
-            gameTypeUrl = Constants.FIREBASE_URL_PUBLIC_GAMES;
-            gamesListRefQuery = new Firebase(gameTypeUrl).orderByChild("dateAndTime");
-        } else if(mGameType == Constants.GameType.PRIVATE) {
-            gameTypeUrl = Constants.FIREBASE_URL_PRIVATE_GAMES;
-            gamesListRefQuery = new Firebase(gameTypeUrl).orderByChild("owner").equalTo(mEncodedEmail);
-        }
-
-        setupGameListItemAdapter(gamesListRefQuery);
+        Query gamesListRefQuery = createQuery();
+        setupGameListItemAdapter(gamesListRefQuery, encodedEmail);
 
         mGamesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -72,7 +61,6 @@ public class GamesFragment extends Fragment {
                      */
                     String listId = mGameListItemAdapter.getRef(position).getKey();
                     intent.putExtra(Constants.KEY_LIST_ID, listId);
-                    // TODO GameType
                     intent.putExtra(Constants.KEY_GAME_TYPE, mGameType);
                     /* Starts an activity showing the details for the selected list */
                     startActivity(intent);
@@ -84,17 +72,36 @@ public class GamesFragment extends Fragment {
         return rootView;
     }
 
-    private void setupGameListItemAdapter(Query gamesListRefQuery) {
+    private Query createQuery() {
+        String gameTypeUrl ="";
+        if (mGameType == Constants.GameType.PUBLIC) {
+            gameTypeUrl = Constants.FIREBASE_URL_PUBLIC_GAMES;
+        } else if(mGameType == Constants.GameType.PRIVATE) {
+            gameTypeUrl = Constants.FIREBASE_URL_PRIVATE_GAMES;
+        }
+        return new Firebase(gameTypeUrl).orderByChild("dateAndTime");
+    }
+
+    private void setupGameListItemAdapter(Query gamesListRefQuery, String encodedEmail) {
         Map<Method, Boolean> filterMap = new HashMap<Method, Boolean>();
 
-        if(mGameState.equals(Constants.GAMES_RUNNING)){
-            filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_STARTED, true);
-            filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_FINISHED, false);
-        } else if(mGameState.equals(Constants.GAMES_FUTURE)){
-            filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_STARTED, false);
-        } else if(mGameState.equals(Constants.GAMES_PAST)){
-            filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_FINISHED, true);
+        switch (mGameState) {
+            case Constants.GAMES_RUNNING:
+                filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_STARTED, true);
+                filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_FINISHED, false);
+                break;
+            case Constants.GAMES_FUTURE:
+                filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_STARTED, false);
+                break;
+            case Constants.GAMES_PAST:
+                filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_FINISHED, true);
+                break;
         }
+
+        // TODO addFilter auch für Strings
+        /*if(mGameType == Constants.GameType.PRIVATE){
+            filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_OWNER, encodedEmail);
+        }*/
 
         mGameListItemAdapter = new GameListItemAdapter(getActivity(), Game.class,
                 R.layout.single_game_list_item, gamesListRefQuery, filterMap);
@@ -105,20 +112,9 @@ public class GamesFragment extends Fragment {
     }
 
     public void updateGameType(Constants.GameType gameType, String encodedEmail) {
-        String gameTypeUrl ="";
         mGameType = gameType;
-        Query gamesListRefQuery = null;
-        if (mGameType == Constants.GameType.PUBLIC) {
-            gameTypeUrl = Constants.FIREBASE_URL_PUBLIC_GAMES;
-            gamesListRefQuery = new Firebase(gameTypeUrl).orderByChild("dateAndTime");
-        } else if(mGameType == Constants.GameType.PRIVATE) {
-            gameTypeUrl = Constants.FIREBASE_URL_PRIVATE_GAMES;
-            gamesListRefQuery = new Firebase(gameTypeUrl).orderByChild("owner").equalTo(encodedEmail);
-        }
-        //Query gamesListRefQuery = new Firebase(gameTypeUrl).orderByChild("dateAndTime");
-
-        mGameListItemAdapter.cleanup();
-        setupGameListItemAdapter(gamesListRefQuery);
+        Query gamesListRefQuery = createQuery();
+        setupGameListItemAdapter(gamesListRefQuery, encodedEmail);
     }
 
     @Override

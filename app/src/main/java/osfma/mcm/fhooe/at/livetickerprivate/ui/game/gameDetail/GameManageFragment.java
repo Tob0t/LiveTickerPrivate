@@ -7,18 +7,23 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -34,6 +39,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.MainActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
@@ -56,6 +62,8 @@ public class GameManageFragment extends Fragment {
     private ArrayList<TextView> mTeam1PointsSets, mTeam2PointsSets;
     private TextView mTeam2NameTable;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
+    private ToggleButton mStartedGame;
+    private CardView mCardView2, mCardView3;
     private EditText mCustomEvent;
     private Button mNextSet, mPrevSet;
     private ArrayList<TableRow> mSetTableRows;
@@ -67,11 +75,16 @@ public class GameManageFragment extends Fragment {
     private User mUser;
     private Constants.GameType mGameType;
     private String mEncodedEmail;
+    private Animation mAnimationFadeIn, mAnimationFadeOut;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_game_manage, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_game_manage, container, false);
+
+        // Animation refs
+        mAnimationFadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
+        mAnimationFadeOut = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
 
         // some inital variables
         mActiveGameSet = Constants.GAMESET_ONE;
@@ -95,15 +108,27 @@ public class GameManageFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Game game = dataSnapshot.getValue(Game.class);
-                mTeam1Name.setText(game.getTeam1());
-                mTeam2Name.setText(game.getTeam2());
+                if(game != null){
+                    mTeam1Name.setText(game.getTeam1());
+                    mTeam2Name.setText(game.getTeam2());
 
-                mTeam1NameTable.setText(game.getTeam1());
-                mTeam2NameTable.setText(game.getTeam2());
+                    mTeam1NameTable.setText(game.getTeam1());
+                    mTeam2NameTable.setText(game.getTeam2());
 
-                mNumberGameSets = game.getGameSets().size();
+                    mNumberGameSets = game.getGameSets().size();
 
-                mGameStarted = game.isStarted();
+                    mGameStarted = game.isStarted();
+                    if(mGameStarted) {
+                        mCardView2.setVisibility(View.VISIBLE);
+                        mCardView3.setVisibility(View.VISIBLE);
+                        mStartedGame.setChecked(true);
+                    }
+                } else{
+                    Helper.showToast(getActivity(), rootView.getResources().getString(R.string.game_deleted));
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
+                }
+
             }
 
             @Override
@@ -171,7 +196,9 @@ public class GameManageFragment extends Fragment {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mUser = dataSnapshot.getValue(User.class);
+                if(dataSnapshot != null) {
+                    mUser = dataSnapshot.getValue(User.class);
+                }
             }
 
             @Override
@@ -277,7 +304,7 @@ public class GameManageFragment extends Fragment {
                     break;
                 }
                 case R.id.button_finish_game:{
-                    sendFinishGame();
+                    toggleGameState();
                     break;
                 }
             }
@@ -297,9 +324,26 @@ public class GameManageFragment extends Fragment {
             }
         }
 
-        private void sendFinishGame() {
-            mGamesEventsRef.push().setValue(new GameEvent("Game is finished! Thank you for using the liveticker!","Admin", Constants.ItemType.INFO));
-            mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_FINISHED).setValue(true);
+        private void toggleGameState() {
+            if(mStartedGame.isChecked()) {
+                mGameStarted = true;
+                mGamesEventsRef.push().setValue(new GameEvent("Game is started!","Admin", Constants.ItemType.INFO));
+                mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_STARTED).setValue(true);
+                mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE).setValue(true);
+
+                mCardView2.startAnimation(mAnimationFadeIn);
+                mCardView3.startAnimation(mAnimationFadeIn);
+                mStartedGame.startAnimation(mAnimationFadeIn);
+
+                mCardView2.setVisibility(View.VISIBLE);
+                mCardView3.setVisibility(View.VISIBLE);
+            } else {
+                mGamesEventsRef.push().setValue(new GameEvent("Game is finished! Thank you for using the liveticker!", "Admin", Constants.ItemType.INFO));
+                mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_FINISHED).setValue(true);
+
+                mCardView2.setVisibility(View.GONE);
+                mCardView3.setVisibility(View.GONE);
+            }
         }
 
         private void changeGameSet(Constants.Navigate direction) {
@@ -310,12 +354,12 @@ public class GameManageFragment extends Fragment {
             if(direction == Constants.Navigate.NEXT) {
                 if(activeGameSetInt+1 < mNumberGameSets){
                     mActiveGameSet = Constants.GAMESETS_LIST.get(activeGameSetInt+1);
-                    mGamesEventsRef.push().setValue(new GameEvent("Changed to "+mActiveGameSet,"Admin", Constants.ItemType.INFO));
+                    mGamesEventsRef.push().setValue(new GameEvent("Changed to next set","Admin", Constants.ItemType.INFO));
                 }
             } else if(direction == Constants.Navigate.PREVIOUS){
                 if(activeGameSetInt > 0){
                     mActiveGameSet = Constants.GAMESETS_LIST.get(activeGameSetInt-1);
-                    mGamesEventsRef.push().setValue(new GameEvent("Changed to "+mActiveGameSet,"Admin", Constants.ItemType.INFO));
+                    mGamesEventsRef.push().setValue(new GameEvent("Changed to previous set","Admin", Constants.ItemType.INFO));
                 }
             }
             updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE, true);
@@ -342,17 +386,19 @@ public class GameManageFragment extends Fragment {
 
     private void initiateScoreUpdate(Constants.Team team, int unaryValue) {
         // Set Game state to started if it isn't set yet
-        if(!mGameStarted){
+        /*if(!mGameStarted){
             mGameStarted = true;
             mGamesEventsRef.push().setValue(new GameEvent("Game is started!","Admin", Constants.ItemType.INFO));
             mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_STARTED).setValue(true);
             mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE).setValue(true);
+        }*/
+        // only update if there is no negative score
+        if(updateScore(team, unaryValue)) {
+            createGameEvent();
         }
-        updateScore(team, unaryValue);
-        createGameEvent();
     }
 
-    private void updateScore(Constants.Team team, int unaryValue) {
+    private boolean updateScore(Constants.Team team, int unaryValue) {
         HashMap<String, Object> updatedScores = new HashMap<String, Object>();
         mTeam1PointsCurrent = Integer.valueOf(mTeam1Points.getText().toString());
         mTeam2PointsCurrent = Integer.valueOf(mTeam2Points.getText().toString());
@@ -363,7 +409,12 @@ public class GameManageFragment extends Fragment {
             mTeam2PointsCurrent += unaryValue;
             updatedScores.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_SCORETEAM2, mTeam2PointsCurrent);
         }
-        mActiveGameSetsRef.updateChildren(updatedScores);
+        if(mTeam1PointsCurrent >= 0 && mTeam2PointsCurrent >= 0) {
+            mActiveGameSetsRef.updateChildren(updatedScores);
+            return true;
+        } else{
+            return false;
+        }
     }
 
     private void createGameEvent() {
@@ -418,7 +469,14 @@ public class GameManageFragment extends Fragment {
         mNextSet = (Button) rootView.findViewById(R.id.button_nextSet);
         mPrevSet = (Button) rootView.findViewById(R.id.button_prevSet);
 
-        Button finishGame = (Button) rootView.findViewById(R.id.button_finish_game);
+        mStartedGame = (ToggleButton) rootView.findViewById(R.id.button_finish_game);
+
+        mCardView2 =  (CardView) rootView.findViewById(R.id.card_view2);
+        mCardView3 =  (CardView) rootView.findViewById(R.id.card_view3);
+
+        // Setting the CardView gone on startup
+        mCardView2.setVisibility(View.GONE);
+        mCardView3.setVisibility(View.GONE);
 
         incrementTeam1.setOnClickListener(onClickListener);
         incrementTeam2.setOnClickListener(onClickListener);
@@ -430,7 +488,7 @@ public class GameManageFragment extends Fragment {
         eventCut.setOnClickListener(onClickListener);
         eventRainbow.setOnClickListener(onClickListener);
         eventSend.setOnClickListener(onClickListener);
-        finishGame.setOnClickListener(onClickListener);
+        mStartedGame.setOnClickListener(onClickListener);
 
         mNextSet.setOnClickListener(onClickListener);
         mPrevSet.setOnClickListener(onClickListener);

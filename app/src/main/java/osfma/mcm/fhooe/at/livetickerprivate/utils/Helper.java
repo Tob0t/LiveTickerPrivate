@@ -1,6 +1,8 @@
 package osfma.mcm.fhooe.at.livetickerprivate.utils;
 
+import android.app.Activity;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -83,6 +85,13 @@ public class Helper {
             }
         }
         return allConditionsTrue;
+    }
+
+    /**
+     * Show toast msg to users
+     */
+    public static void showToast(Activity activity, String message) {
+        Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
     }
 
     /*public static HashMap<String, Object> updateGameSet
