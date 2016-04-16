@@ -29,8 +29,8 @@ import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
  */
 public class GameListItemAdapter extends FirebaseListAdapter<Game> {
     private static final String LOG_TAG = GameListItemAdapter.class.getSimpleName();
-    private Map<Method, Boolean> mFilter;
-    public GameListItemAdapter(Activity activity, Class<Game> modelClass, int modelLayout, Query ref, Map<Method, Boolean> filter) {
+    private Map<Method, Object> mFilter;
+    public GameListItemAdapter(Activity activity, Class<Game> modelClass, int modelLayout, Query ref, Map<Method, Object> filter) {
         super(activity, modelClass, modelLayout, ref);
         this.mActivity = activity;
         this.mLayout = modelLayout;
@@ -110,7 +110,7 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
             view = mActivity.getLayoutInflater().inflate(mLayout, viewGroup, false);
             populateView(view, model, position);
         } else{
-            // Hack to hide view if its filteredblank item
+            // Hack to hide view if its filtered blank item
             view = new View(mActivity);
         }
 

@@ -87,7 +87,7 @@ public class GameWatchFragment extends Fragment{
         mActiveGameSetsRef = new Firebase(gameType).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
         mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
-        mActiveGameRef.keepSynced(true);
+        //mActiveGameRef.keepSynced(true);
 
         initializeScreen(rootView);
 
@@ -123,6 +123,7 @@ public class GameWatchFragment extends Fragment{
                 } else{
                     Helper.showToast(getActivity(), rootView.getResources().getString(R.string.game_deleted));
                     Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
 

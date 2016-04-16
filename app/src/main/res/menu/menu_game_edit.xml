@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.game.gameDetail.GameEditActivity">
+    <item
+        android:id="@+id/action_discard"
+        android:icon="@drawable/ic_close_white_24px"
+        android:title="@string/action_discard"
+        app:showAsAction="always"/>
+
+    </menu>

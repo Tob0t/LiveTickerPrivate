@@ -32,8 +32,6 @@ public class CreateAccountActivity extends BaseActivity {
     private Firebase mFirebaseRef;
     private EditText mEditTextUsernameCreate, mEditTextEmailCreate, mEditTextPasswordCreate;
     private String mUserEmail, mPassword, mUserName;
-    private int mUserId;
-    private SecureRandom mRandom = new SecureRandom();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

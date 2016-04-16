@@ -8,26 +8,21 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.koushikdutta.ion.Ion;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -37,14 +32,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import osfma.mcm.fhooe.at.livetickerprivate.R;
-import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameDetailTabsPagerAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameTabsPagerAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameCreate.GameCreateActivity;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameListItemAdapter;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail.GameDetailActivity;
-import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gamesList.GamesFragment;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.game.gamesList.GamesListFragment;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.settings.SettingsActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Helper;
 
@@ -94,9 +86,13 @@ public class MainActivity extends BaseActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
+        if(drawer != null) {
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            } else {
+                super.onBackPressed();
+            }
+        } else{
             super.onBackPressed();
         }
     }
@@ -129,8 +125,7 @@ public class MainActivity extends BaseActivity
             setTitle(this.getString(R.string.title_private_games));
             updateGameType();
         } else if (id == R.id.action_manage_account) {
-            createDialog();
-            return true;
+            startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
         } else if (id == R.id.action_logout) {
             logout();
             return true;
@@ -144,8 +139,8 @@ public class MainActivity extends BaseActivity
     private void updateGameType() {
         // update all fragments if the GameType is changed
         for(Fragment f :getSupportFragmentManager().getFragments()){
-            if(f instanceof  GamesFragment){
-                ((GamesFragment) f).updateGameType(mGameType, mEncodedEmail);
+            if(f instanceof GamesListFragment){
+                ((GamesListFragment) f).updateGameType(mGameType, mEncodedEmail);
             }
         }
     }
@@ -154,18 +149,6 @@ public class MainActivity extends BaseActivity
     }
     public String getmEncodedEmail() {
         return mEncodedEmail;
-    }
-
-    // TODO Improve
-    private void createDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
-        TextView name = (TextView) view.findViewById(R.id.edit_name_dialog);
-        name.setText(mUser.getName(),null);
-        builder.setView(view);
-        builder.create();
-        builder.show();
-
     }
 
     /**
@@ -193,6 +176,7 @@ public class MainActivity extends BaseActivity
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
@@ -206,6 +190,7 @@ public class MainActivity extends BaseActivity
                 if(mUser != null) {
                     accountName.setText(mUser.getName());
                     accountEmail.setText(Helper.decodeEmail(mUser.getEmail()));
+
                     /* Load Image URL with Ion */
                     Ion.with(profilePic)
                             .load(mUser.getProfileImageUrl());

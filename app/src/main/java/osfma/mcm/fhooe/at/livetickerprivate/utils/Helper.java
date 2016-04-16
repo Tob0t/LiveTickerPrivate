@@ -2,6 +2,8 @@ package osfma.mcm.fhooe.at.livetickerprivate.utils;
 
 import android.app.Activity;
 import android.util.Log;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -55,7 +57,7 @@ public class Helper {
         return gameType;
     }
     // Using reflection for the filter parameters
-    public static Map<Method,Boolean> addFilter(Map<Method, Boolean> hashMap, Class className, String methodName, boolean valueParam) {
+    public static Map<Method,Object> addFilter(Map<Method, Object> hashMap, Class className, String methodName, Object valueParam) {
 
         Method methodParam = null;
         try {
@@ -68,20 +70,36 @@ public class Helper {
     }
 
     // iterate over all Filter Methods, if they are all true than inflate an icon
-    public static boolean checkAllCondtionsTrue(Object object, Map<Method, Boolean> mFilter) {
+    public static boolean checkAllCondtionsTrue(Object object, Map<Method, Object> mFilter){
         boolean allConditionsTrue = true;
 
-        for(Map.Entry<Method, Boolean> entry: mFilter.entrySet()) {
+        for(Map.Entry<Method, Object> entry: mFilter.entrySet()) {
             Method methodParam = entry.getKey();
-            boolean valueParam = entry.getValue();
-            try {
-                if((boolean) methodParam.invoke(object) != valueParam){
-                    allConditionsTrue = false;
+            // handle boolean params
+            if(entry.getValue() instanceof Boolean){
+                boolean valueParam = (boolean) entry.getValue();
+                try {
+                    if((boolean) methodParam.invoke(object) != valueParam){
+                        allConditionsTrue = false;
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
+            }
+            // handle String params
+            else if(entry.getValue() instanceof String){
+                String valueParam = (String) entry.getValue();
+                try {
+                    if(!(((String) methodParam.invoke(object)).equals(valueParam))){
+                        allConditionsTrue = false;
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return allConditionsTrue;

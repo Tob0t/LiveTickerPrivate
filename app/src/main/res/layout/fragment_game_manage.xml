@@ -364,78 +364,89 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true">
-
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/event_ace"
-                    android:id="@+id/button_event_ace"
-                    android:layout_alignParentTop="true"
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true" />
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true">
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_ace"
+                        android:id="@+id/button_event_ace"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:background="@color/transparent" />
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_block"
+                        android:id="@+id/button_event_block"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:background="@color/transparent" />
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_lineshot"
+                        android:id="@+id/button_event_lineshot"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:background="@color/transparent"
+                        android:layout_alignParentTop="true" />
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_cut"
+                        android:id="@+id/button_event_cut"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:background="@color/transparent" />
 
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/event_block"
-                    android:id="@+id/button_event_block"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/button_event_ace"
-                    android:layout_toEndOf="@+id/button_event_ace" />
+                    <Button
+                        style="?android:attr/buttonStyleSmall"
+                        android:layout_weight="1.4"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_rainbow"
+                        android:id="@+id/button_event_rainbow"
+                        android:background="@color/transparent"
+                        android:gravity="center_horizontal|center_vertical" />
 
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/event_lineshot"
-                    android:id="@+id/button_event_lineshot"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/button_event_block"
-                    android:layout_toEndOf="@+id/button_event_block" />
-
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/event_cut"
-                    android:id="@+id/button_event_cut"
-                    android:layout_alignTop="@+id/button_event_lineshot"
-                    android:layout_toRightOf="@+id/button_event_lineshot"
-                    android:layout_toEndOf="@+id/button_event_lineshot" />
-
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/event_rainbow"
-                    android:id="@+id/button_event_rainbow"
-                    android:layout_alignTop="@+id/button_event_cut"
-                    android:layout_toRightOf="@+id/button_event_cut"
-                    android:layout_toEndOf="@+id/button_event_cut" />
-
-                <EditText
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/editText_manage_game_event"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
-                    android:layout_toLeftOf="@+id/button_event_rainbow"
-                    android:layout_toStartOf="@+id/button_event_rainbow"
-                    android:hint="Type your custom event" />
+                    android:weightSum="1">
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/editText_manage_game_event"
+                        android:hint="Type your custom event"
+                        android:layout_weight="0.9"
+                        android:paddingStart="10dp"
+                        android:paddingLeft="10dp" />
 
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/button_send_event"
-                    android:src="@android:drawable/ic_menu_send"
-                    android:layout_alignParentBottom="true"
-                    android:layout_toRightOf="@+id/editText_manage_game_event"
-                    android:layout_toEndOf="@+id/editText_manage_game_event"
-                    android:visibility="invisible" />
-
+                    <ImageButton
+                        android:layout_weight="0.1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/button_send_event"
+                        android:src="@drawable/ic_send_black_24dp"
+                        android:visibility="invisible"
+                        android:background="@color/transparent"
+                        android:layout_gravity="center" />
+                </LinearLayout>
             </RelativeLayout>
         </android.support.v7.widget.CardView>
 

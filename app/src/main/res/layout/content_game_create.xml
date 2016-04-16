@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".ui.game.gameCreate.GameCreateActivity"
+    tools:showIn="@layout/activity_game_create">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:weightSum="1">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/icon_sportType"
+                android:layout_weight="1"
+                android:src="@drawable/ic_star_black_48px"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_vertical" />
+
+            <Spinner
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:id="@+id/spinner_sportType"
+                android:layout_weight="5.5" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/icon_team1"
+                android:layout_weight="1"
+                android:src="@drawable/ic_group_black_48px"
+                android:layout_column="0"
+                android:layout_below="@+id/spinner_sportType"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_vertical" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/editText_team1"
+                android:layout_column="1"
+                android:layout_weight="5"
+                android:autoText="false"
+                android:hint="Team 1"
+                android:layout_below="@+id/spinner_sportType"
+                android:layout_alignLeft="@+id/spinner_sportType"
+                android:layout_alignStart="@+id/spinner_sportType" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/icon_team2"
+                android:layout_weight="1"
+                android:src="@drawable/ic_group_black_48px"
+                android:layout_column="0"
+                android:layout_alignTop="@+id/editText_team2"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_vertical" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/editText_team2"
+                android:layout_column="1"
+                android:layout_weight="5"
+                android:hint="Team 2"
+                android:layout_below="@+id/editText_team1"
+                android:layout_alignLeft="@+id/editText_team1"
+                android:layout_alignStart="@+id/editText_team1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/icon_date"
+                android:layout_weight="1"
+                android:src="@drawable/ic_today_black_24dp"
+                android:layout_column="0"
+                android:layout_below="@+id/editText_team2"
+                android:layout_toLeftOf="@+id/spinner_sportType"
+                android:layout_toStartOf="@+id/spinner_sportType"
+                android:layout_gravity="center_vertical" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="date"
+                android:ems="10"
+                android:id="@+id/editText_date"
+                android:layout_column="1"
+                android:layout_weight="5"
+                android:hint="Date"
+                android:focusableInTouchMode="false"
+                android:layout_below="@+id/editText_team2"
+                android:layout_alignLeft="@+id/editText_team2"
+                android:layout_alignStart="@+id/editText_team2" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/icon_time"
+                android:layout_weight="1"
+                android:src="@drawable/ic_time_black_24dp"
+                android:layout_column="0"
+                android:layout_alignTop="@+id/editText_time"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_vertical" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="time"
+                android:ems="10"
+                android:id="@+id/editText_time"
+                android:layout_column="1"
+                android:layout_weight="5"
+                android:hint="Time"
+                android:focusableInTouchMode="false"
+                android:layout_below="@+id/editText_date"
+                android:layout_alignLeft="@+id/editText_date"
+                android:layout_alignStart="@+id/editText_date" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/icon_public"
+                android:layout_weight="1"
+                android:src="@drawable/ic_public_black_24dp"
+                android:layout_gravity="center_vertical" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="5"
+                android:layout_height="wrap_content">
+
+                <ToggleButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/toggleButton_privacy"
+                    android:checked="true"
+                    android:textOn="@string/toggle_button_public"
+                    android:textOff="@string/toggle_button_private" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0">
+
+            <Button
+                android:text="@string/create_game"
+                android:id="@+id/button_update_game"
+                android:layout_column="1"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/orange" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -3,6 +3,8 @@ package osfma.mcm.fhooe.at.livetickerprivate.ui.game.gameDetail;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -66,6 +68,7 @@ public class GameManageFragment extends Fragment {
     private CardView mCardView2, mCardView3;
     private EditText mCustomEvent;
     private Button mNextSet, mPrevSet;
+    private Button mEventAce, mEventBlock, mEventLine, mEventCut, mEventRainbow;
     private ArrayList<TableRow> mSetTableRows;
     private TableRow mHeadline;
     private int mTeam1PointsCurrent, mTeam2PointsCurrent;
@@ -126,6 +129,7 @@ public class GameManageFragment extends Fragment {
                 } else{
                     Helper.showToast(getActivity(), rootView.getResources().getString(R.string.game_deleted));
                     Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
 
@@ -281,22 +285,32 @@ public class GameManageFragment extends Fragment {
                 }
                 case R.id.button_event_ace: {
                     mCustomEvent.setText(getResources().getString(R.string.event_ace));
+                    resetButtons();
+                    v.setBackgroundResource(R.color.background_tab_pressed);
                     break;
                 }
                 case R.id.button_event_block: {
                     mCustomEvent.setText(getResources().getString(R.string.event_block));
+                    resetButtons();
+                    v.setBackgroundResource(R.color.background_tab_pressed);
                     break;
                 }
                 case R.id.button_event_lineshot: {
                     mCustomEvent.setText(getResources().getString(R.string.event_lineshot));
+                    resetButtons();
+                    v.setBackgroundResource(R.color.background_tab_pressed);
                     break;
                 }
                 case R.id.button_event_cut: {
                     mCustomEvent.setText(getResources().getString(R.string.event_cut));
+                    resetButtons();
+                    v.setBackgroundResource(R.color.background_tab_pressed);
                     break;
                 }
                 case R.id.button_event_rainbow: {
                     mCustomEvent.setText(getResources().getString(R.string.event_rainbow));
+                    resetButtons();
+                    v.setBackgroundResource(R.color.background_tab_pressed);
                     break;
                 }
                 case R.id.button_send_event: {
@@ -322,6 +336,7 @@ public class GameManageFragment extends Fragment {
                 Snackbar.make(v, "Game not started yet!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
+            resetButtons();
         }
 
         private void toggleGameState() {
@@ -367,7 +382,13 @@ public class GameManageFragment extends Fragment {
         }
     };
 
-
+    private void resetButtons() {
+        mEventAce.setBackgroundResource(R.color.transparent);
+        mEventBlock.setBackgroundResource(R.color.transparent);
+        mEventLine.setBackgroundResource(R.color.transparent);
+        mEventCut.setBackgroundResource(R.color.transparent);
+        mEventRainbow.setBackgroundResource(R.color.transparent);
+    }
 
 
     private void updateButtonVisibility() {
@@ -424,6 +445,7 @@ public class GameManageFragment extends Fragment {
         score.append(mTeam2PointsCurrent);
         mGamesEventsRef.push().setValue(new GameEvent(score.toString(), mCustomEvent.getText().toString(), mUser.getName(), Constants.ItemType.SCORE));
         mCustomEvent.setText("");
+        resetButtons();
     }
 
     private void initializeScreen(View rootView) {
@@ -457,11 +479,13 @@ public class GameManageFragment extends Fragment {
         Button decrementTeam1 = (Button) rootView.findViewById(R.id.button_decrement_team1);
         Button decrementTeam2 = (Button) rootView.findViewById(R.id.button_decrement_team2);
 
-        Button eventAce = (Button) rootView.findViewById(R.id.button_event_ace);
-        Button eventBlock = (Button) rootView.findViewById(R.id.button_event_block);
-        Button eventLine = (Button) rootView.findViewById(R.id.button_event_lineshot);
-        Button eventCut = (Button) rootView.findViewById(R.id.button_event_cut);
-        Button eventRainbow = (Button) rootView.findViewById(R.id.button_event_rainbow);
+        mEventAce = (Button) rootView.findViewById(R.id.button_event_ace);
+        mEventBlock = (Button) rootView.findViewById(R.id.button_event_block);
+        mEventLine = (Button) rootView.findViewById(R.id.button_event_lineshot);
+        mEventCut = (Button) rootView.findViewById(R.id.button_event_cut);
+        mEventRainbow = (Button) rootView.findViewById(R.id.button_event_rainbow);
+
+
 
         final ImageButton eventSend = (ImageButton) rootView.findViewById(R.id.button_send_event);
         mCustomEvent = (EditText) rootView.findViewById(R.id.editText_manage_game_event);
@@ -482,18 +506,18 @@ public class GameManageFragment extends Fragment {
         incrementTeam2.setOnClickListener(onClickListener);
         decrementTeam1.setOnClickListener(onClickListener);
         decrementTeam2.setOnClickListener(onClickListener);
-        eventAce.setOnClickListener(onClickListener);
-        eventBlock.setOnClickListener(onClickListener);
-        eventLine.setOnClickListener(onClickListener);
-        eventCut.setOnClickListener(onClickListener);
-        eventRainbow.setOnClickListener(onClickListener);
+        mEventAce.setOnClickListener(onClickListener);
+        mEventBlock.setOnClickListener(onClickListener);
+        mEventLine.setOnClickListener(onClickListener);
+        mEventCut.setOnClickListener(onClickListener);
+        mEventRainbow.setOnClickListener(onClickListener);
         eventSend.setOnClickListener(onClickListener);
         mStartedGame.setOnClickListener(onClickListener);
 
         mNextSet.setOnClickListener(onClickListener);
         mPrevSet.setOnClickListener(onClickListener);
 
-        // Hide send button if there box is empty
+        // Hide send button if the box is empty
         mCustomEvent.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

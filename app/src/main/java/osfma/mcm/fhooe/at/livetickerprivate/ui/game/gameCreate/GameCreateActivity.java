@@ -98,7 +98,7 @@ public class GameCreateActivity extends BaseActivity {
         mDate = (EditText) findViewById(R.id.editText_date);
 
         mTime = (EditText) findViewById(R.id.editText_time);
-        Button createGame = (Button) findViewById(R.id.button_create_game);
+        Button createGame = (Button) findViewById(R.id.button_update_game);
 
         mTogglePrivacy = (ToggleButton) findViewById(R.id.toggleButton_privacy);
 
@@ -143,7 +143,7 @@ public class GameCreateActivity extends BaseActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Game newGame = new Game(sportType,team1,team2,dateAndTime,3,mEncodedEmail);
+        Game newGame = new Game(sportType,team1,team2,dateAndTime,Constants.SET_COUNT_DEFAULT,mEncodedEmail);
 
         // Get the reference to the root node in Firebase
         Firebase ref = new Firebase(Constants.FIREBASE_URL);
