@@ -28,6 +28,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.model.User;
 public class Helper {
     private static final String LOG_TAG = Helper.class.getSimpleName();
 
+    // Date and time formatter functions
     public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yyyy", Locale.GERMAN);
     public static final SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("HH:mm", Locale.GERMAN);
     public static final SimpleDateFormat TIMESTAMP_FORMATTER = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.GERMAN);
@@ -35,9 +36,7 @@ public class Helper {
 
     /**
     * Encode user email to use it as a Firebase key (Firebase does not allow "." in the key name)
-    * Encoded email is also used as "userEmail", list and item "owner" value
     */
-
     public static String encodeEmail(String userEmail) {
         return userEmail.replace(".", ",");
     }
@@ -45,10 +44,12 @@ public class Helper {
         return userEmail.replace(",", ".");
     }
 
-    public static boolean checkIfOwner(Game game, String currentUserEmail) {
-        return (game.getOwner() != null && game.getOwner().equals(currentUserEmail));
+    // check if the user is owner of the game
+    public static boolean checkIfOwner(Game game, String userId) {
+        return (game.getUserId() != null && game.getUserId().equals(userId));
     }
 
+    // transform the gametype to a firebase link
     public static String checkGameType(Constants.GameType _gameType) {
         String gameType = Constants.FIREBASE_URL_PUBLIC_GAMES;
         if(_gameType == Constants.GameType.PRIVATE){
@@ -69,7 +70,7 @@ public class Helper {
         return hashMap;
     }
 
-    // iterate over all Filter Methods, if they are all true than inflate an icon
+    // iterate over all Filter Methods, if they are all true than inflate an item
     public static boolean checkAllCondtionsTrue(Object object, Map<Method, Object> mFilter){
         boolean allConditionsTrue = true;
 
@@ -105,21 +106,16 @@ public class Helper {
         return allConditionsTrue;
     }
 
+    // return userId of current user
+    public static String getUserId(){
+        Firebase ref = new Firebase(Constants.FIREBASE_URL);
+        return ref.getAuth().getUid();
+    }
+
     /**
      * Show toast msg to users
      */
     public static void showToast(Activity activity, String message) {
         Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
     }
-
-    /*public static HashMap<String, Object> updateGameSet
-     (final String listId,
-     final String owner, HashMap<String, Object> mapToUpdate,
-     String propertyToUpdate, Object valueToUpdate) {
-
-     mapToUpdate.put("/" + "/" + owner + "/"
-     + listId + "/" + propertyToUpdate, valueToUpdate);
-
-     return mapToUpdate;
-     }*/
 }

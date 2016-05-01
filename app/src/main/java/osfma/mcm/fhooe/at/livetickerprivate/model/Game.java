@@ -19,13 +19,13 @@ public class Game {
     private boolean finished;
     private HashMap<String, GameSet> gameSets;
     private HashMap<String, Object> timestampLastChanged;
-    private String owner;
+    private String userId;
 
     public Game() {
         gameSets = new HashMap<String, GameSet>();
     }
 
-    public Game(String sportType, String team1, String team2, long dateAndTime, int numberOfGameSets, String owner) {
+    public Game(String sportType, String team1, String team2, long dateAndTime, int numberOfGameSets, String userId) {
         this.sportType = sportType;
         this.team1 = team1;
         this.team2 = team2;
@@ -37,7 +37,7 @@ public class Game {
         HashMap<String, Object> timestampLastChangedObj = new HashMap<String, Object>();
         timestampLastChangedObj.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
         this.timestampLastChanged = timestampLastChangedObj;
-        this.owner = owner;
+        this.userId = userId;
     }
 
 
@@ -73,8 +73,8 @@ public class Game {
         return timestampLastChanged;
     }
 
-    public String getOwner() {
-        return owner;
+    public String getUserId() {
+        return userId;
     }
 
     @JsonIgnore

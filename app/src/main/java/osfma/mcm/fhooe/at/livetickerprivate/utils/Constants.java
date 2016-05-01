@@ -23,6 +23,7 @@ public final class Constants {
     public static final String FIREBASE_LOCATION_GAMES_EVENTS = "games_events";
     public static final String FIREBASE_LOCATION_GAMES_GAMESETS = "gameSets";
     public static final String FIREBASE_LOCATION_USERS = "users";
+    public static final String FIREBASE_LOCATIN_USER_TYPING_INDICATOR = "typingIndicator";
 
     public static final String FIREBASE_PROPERTY_GAMES_SPORTTYPE = "sportType";
     public static final String FIREBASE_PROPERTY_GAMES_TEAM1 = "team1";
@@ -37,11 +38,16 @@ public final class Constants {
     public static final String FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE = "active";
     public static final String FIREBASE_PROPERTY_EMAIL = "email";
 
+    public static final String FIREBASE_PROPERTY_GAMES_EVENTS_INFO = "info";
+
+    public static final String FIREBASE_PROPERTY_USERS_NAME = "name";
+
 
     public static final String FIREBASE_URL_PUBLIC_GAMES = FIREBASE_URL + "/" + FIREBASE_LOCATION_PUBLIC_GAMES;
     public static final String FIREBASE_URL_PRIVATE_GAMES = FIREBASE_URL + "/" + FIREBASE_LOCATION_PRIVATE_GAMES;
     public static final String FIREBASE_URL_GAMES_EVENTS = FIREBASE_URL + "/" + FIREBASE_LOCATION_GAMES_EVENTS;
     public static final String FIREBASE_URL_USERS = FIREBASE_URL + "/" + FIREBASE_LOCATION_USERS;
+    public static final String FIREBASE_URL_USER_TYPING_INDICATOR = FIREBASE_URL + "/" + FIREBASE_LOCATIN_USER_TYPING_INDICATOR;
 
 
     /**
@@ -50,9 +56,9 @@ public final class Constants {
     public static final String KEY_LIST_ID = "GAME_ID";
     public static final String KEY_GOOGLE_EMAIL = "GOOGLE_EMAIL";
     public static final String KEY_PROVIDER = "PROVIDER";
-    public static final String KEY_ENCODED_EMAIL = "ENCODED_EMAIL";
     public static final String KEY_SIGNUP_EMAIL = "SIGNUP_EMAIL";
     public static final String KEY_GAME_TYPE = "GAME_TYPE";
+    public static final String KEY_USER_ID = "USER_ID";
 
     /**
      * Constants for Firebase login
@@ -68,15 +74,15 @@ public final class Constants {
     public static final String GAME_STATE = "GameState";
     public static final String GAMES_RUNNING = "Running";
     public static final String GAMES_FUTURE = "Future";
-    public static final String GAMES_PAST = "Past";
+    public static final String GAMES_FINISHED = "Finished";
 
     /**
      * Methods of Game for Reflection
      */
-
     public static final String METHOD_GAME_STARTED = "isStarted";
     public static final String METHOD_GAME_FINISHED = "isFinished";
-    public static final String METHOD_GAME_OWNER = "getOwner";
+    public static final String METHOD_GAME_OWNER = "getUserId";
+
     /**
      * Constants for GamyType
      */
@@ -87,9 +93,7 @@ public final class Constants {
     /**
      * Constants for Settings
      */
-
     public static final String USERNAME = "username";
-
 
     /**
      * Enums
@@ -127,5 +131,5 @@ public final class Constants {
             GAMESET_FIVE,
             GAMESET_SIX
     );
-    
+
 }

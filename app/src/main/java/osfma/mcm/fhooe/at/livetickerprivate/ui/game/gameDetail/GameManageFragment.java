@@ -55,9 +55,8 @@ public class GameManageFragment extends Fragment {
     private Firebase mGamesEventsRef;
     private Firebase mActiveGameSetsRef;
     private Firebase mActiveGameActiveSetRef;
-    private Firebase mUserRef;
     private Firebase mLastChildAdded;
-    private ValueEventListener mActiveGameRefListener, mUserRefListener;
+    private ValueEventListener mActiveGameRefListener;
     private ChildEventListener mActiveGameSetsRefListener, mGamesEventsRefListener;
     private String mGameId;
     private TextView mTeam1NameTable;
@@ -75,9 +74,9 @@ public class GameManageFragment extends Fragment {
     private String mActiveGameSet;
     private int mNumberGameSets;
     private boolean mGameStarted;
-    private User mUser;
+    private boolean mGameFinished;
     private Constants.GameType mGameType;
-    private String mEncodedEmail;
+    private String mUserId;
     private Animation mAnimationFadeIn, mAnimationFadeOut;
 
     @Nullable
@@ -92,20 +91,21 @@ public class GameManageFragment extends Fragment {
         // some inital variables
         mActiveGameSet = Constants.GAMESET_ONE;
         mGameStarted = false;
+        mGameFinished = false;
+
 
          /* Get the push ID from the extra passed by ShoppingListFragment */
         Intent intent = getActivity().getIntent();
         mGameId = intent.getStringExtra(Constants.KEY_LIST_ID);
         mGameType = (Constants.GameType) intent.getSerializableExtra(Constants.KEY_GAME_TYPE);
 
-        // Get email from Activity
-        mEncodedEmail = ((GameDetailActivity)getActivity()).getmEncodedEmail();
+        // Get userId from Activity
+        mUserId = ((GameDetailActivity)getActivity()).getmUserId();
 
         String gameType = Helper.checkGameType(mGameType);
         mActiveGameRef = new Firebase(gameType).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
         mActiveGameSetsRef = new Firebase(gameType).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
-        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
         mActiveGameRefListener = mActiveGameRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -121,7 +121,8 @@ public class GameManageFragment extends Fragment {
                     mNumberGameSets = game.getGameSets().size();
 
                     mGameStarted = game.isStarted();
-                    if(mGameStarted) {
+                    mGameFinished = game.isFinished();
+                    if(mGameStarted && !mGameFinished) {
                         mCardView2.setVisibility(View.VISIBLE);
                         mCardView3.setVisibility(View.VISIBLE);
                         mStartedGame.setChecked(true);
@@ -193,22 +194,6 @@ public class GameManageFragment extends Fragment {
             @Override
             public void onCancelled(FirebaseError firebaseError) {
 
-            }
-        });
-
-        mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot != null) {
-                    mUser = dataSnapshot.getValue(User.class);
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Log.e(LOG_TAG, getString(R.string.log_error_the_read_failed)
-                        + firebaseError.getMessage());
             }
         });
 
@@ -326,8 +311,8 @@ public class GameManageFragment extends Fragment {
 
         private void sendEvent(View v) {
             String message = mCustomEvent.getText().toString();
-            if (mGameStarted) {
-                mLastChildAdded.child("info").setValue(message);
+            if (mGameStarted && mLastChildAdded != null) {
+                mLastChildAdded.child(Constants.FIREBASE_PROPERTY_GAMES_EVENTS_INFO).setValue(message);
                 // Hide keyboard
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(mCustomEvent.getWindowToken(), 0);
@@ -340,10 +325,12 @@ public class GameManageFragment extends Fragment {
         }
 
         private void toggleGameState() {
+
             if(mStartedGame.isChecked()) {
                 mGameStarted = true;
-                mGamesEventsRef.push().setValue(new GameEvent("Game is started!","Admin", Constants.ItemType.INFO));
+                mGamesEventsRef.push().setValue(new GameEvent(getActivity().getResources().getString(R.string.info_game_started), Constants.ItemType.INFO, mUserId));
                 mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_STARTED).setValue(true);
+                mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_FINISHED).setValue(false);
                 mActiveGameSetsRef.child(mActiveGameSet).child(Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE).setValue(true);
 
                 mCardView2.startAnimation(mAnimationFadeIn);
@@ -353,7 +340,7 @@ public class GameManageFragment extends Fragment {
                 mCardView2.setVisibility(View.VISIBLE);
                 mCardView3.setVisibility(View.VISIBLE);
             } else {
-                mGamesEventsRef.push().setValue(new GameEvent("Game is finished! Thank you for using the liveticker!", "Admin", Constants.ItemType.INFO));
+                mGamesEventsRef.push().setValue(new GameEvent(getActivity().getResources().getString(R.string.info_game_finished), Constants.ItemType.INFO, mUserId));
                 mActiveGameRef.child(Constants.FIREBASE_PROPERTY_GAMES_FINISHED).setValue(true);
 
                 mCardView2.setVisibility(View.GONE);
@@ -369,12 +356,12 @@ public class GameManageFragment extends Fragment {
             if(direction == Constants.Navigate.NEXT) {
                 if(activeGameSetInt+1 < mNumberGameSets){
                     mActiveGameSet = Constants.GAMESETS_LIST.get(activeGameSetInt+1);
-                    mGamesEventsRef.push().setValue(new GameEvent("Changed to next set","Admin", Constants.ItemType.INFO));
+                    mGamesEventsRef.push().setValue(new GameEvent(getActivity().getResources().getString(R.string.info_next_set), Constants.ItemType.INFO, mUserId));
                 }
             } else if(direction == Constants.Navigate.PREVIOUS){
                 if(activeGameSetInt > 0){
                     mActiveGameSet = Constants.GAMESETS_LIST.get(activeGameSetInt-1);
-                    mGamesEventsRef.push().setValue(new GameEvent("Changed to previous set","Admin", Constants.ItemType.INFO));
+                    mGamesEventsRef.push().setValue(new GameEvent(getActivity().getResources().getString(R.string.info_prev_set), Constants.ItemType.INFO, mUserId));
                 }
             }
             updatedGameSets.put(mActiveGameSet + "/" + Constants.FIREBASE_PROPERTY_GAMES_GAMESETS_ACTIVE, true);
@@ -443,7 +430,7 @@ public class GameManageFragment extends Fragment {
         score.append(mTeam1PointsCurrent);
         score.append(":");
         score.append(mTeam2PointsCurrent);
-        mGamesEventsRef.push().setValue(new GameEvent(score.toString(), mCustomEvent.getText().toString(), mUser.getName(), Constants.ItemType.SCORE));
+        mGamesEventsRef.push().setValue(new GameEvent(score.toString(), mCustomEvent.getText().toString(), Constants.ItemType.SCORE, mUserId));
         mCustomEvent.setText("");
         resetButtons();
     }
@@ -484,8 +471,6 @@ public class GameManageFragment extends Fragment {
         mEventLine = (Button) rootView.findViewById(R.id.button_event_lineshot);
         mEventCut = (Button) rootView.findViewById(R.id.button_event_cut);
         mEventRainbow = (Button) rootView.findViewById(R.id.button_event_rainbow);
-
-
 
         final ImageButton eventSend = (ImageButton) rootView.findViewById(R.id.button_send_event);
         mCustomEvent = (EditText) rootView.findViewById(R.id.editText_manage_game_event);
@@ -546,8 +531,6 @@ public class GameManageFragment extends Fragment {
         mActiveGameRef.removeEventListener(mActiveGameRefListener);
         mActiveGameSetsRef.removeEventListener(mActiveGameSetsRefListener);
         mGamesEventsRef.removeEventListener(mGamesEventsRefListener);
-        mUserRef.removeEventListener(mUserRefListener);
-
     }
 
 }

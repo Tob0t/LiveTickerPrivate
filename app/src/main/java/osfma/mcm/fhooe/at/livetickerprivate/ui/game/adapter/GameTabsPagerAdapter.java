@@ -35,7 +35,7 @@ public class GameTabsPagerAdapter extends FragmentPagerAdapter {
                 tab2.setArguments(b);
                 return tab2;
             case 2:
-                b.putString(Constants.GAME_STATE, Constants.GAMES_PAST);
+                b.putString(Constants.GAME_STATE, Constants.GAMES_FINISHED);
                 GamesListFragment tab3 = new GamesListFragment();
                 tab3.setArguments(b);
                 return tab3;

@@ -48,16 +48,17 @@ public class SettingsActivity extends MainActivity implements SharedPreferences.
         /**
          * Create Firebase references
          */
-        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
+        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mUserId);
         mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mUser = dataSnapshot.getValue(User.class);
-
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(Constants.USERNAME, mUser.getName());
-                editor.commit();
+                if(mUser != null) {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(Constants.USERNAME, mUser.getName());
+                    editor.apply();
+                }
         }
 
             @Override
@@ -73,7 +74,7 @@ public class SettingsActivity extends MainActivity implements SharedPreferences.
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(Constants.USERNAME)) {
-            mUserRef.child("name").setValue(sharedPreferences.getString(Constants.USERNAME,""));
+            mUserRef.child(Constants.FIREBASE_PROPERTY_USERS_NAME).setValue(sharedPreferences.getString(Constants.USERNAME,""));
         }
 
     }

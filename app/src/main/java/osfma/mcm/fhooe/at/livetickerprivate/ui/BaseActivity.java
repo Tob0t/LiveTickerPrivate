@@ -34,7 +34,7 @@ import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 public abstract class BaseActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
-    protected String mEncodedEmail, mProvider;
+    protected String mProvider, mUserId;
     protected GoogleApiClient mGoogleApiClient;
     protected Firebase.AuthStateListener mAuthListener;
     protected Firebase mFirebaseRef;
@@ -42,6 +42,9 @@ public abstract class BaseActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Get ref to Firebase URL
+        mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
         /* Setup the Google API object to allow Google logins */
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -58,15 +61,14 @@ public abstract class BaseActivity extends AppCompatActivity implements
                 .build();
 
         /**
-         * Getting mProvider and mEncodedEmail from SharedPreferences
+         * Getting mProvider and mUserId from SharedPreferences
          */
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(BaseActivity.this);
-        /* Get mEncodedEmail and mProvider from SharedPreferences, use null as default value */
-        mEncodedEmail = sp.getString(Constants.KEY_ENCODED_EMAIL, null);
+        /* Get mUserId and mProvider from SharedPreferences, use null as default value */
         mProvider = sp.getString(Constants.KEY_PROVIDER, null);
+        mUserId = sp.getString(Constants.KEY_USER_ID, null);
 
         if (!((this instanceof LoginActivity) || (this instanceof CreateAccountActivity))) {
-            mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
             mAuthListener = new Firebase.AuthStateListener() {
                 @Override
                 public void onAuthStateChanged(AuthData authData) {
@@ -74,8 +76,8 @@ public abstract class BaseActivity extends AppCompatActivity implements
                     if (authData == null) {
                         /* Clear out shared preferences */
                         SharedPreferences.Editor spe = sp.edit();
-                        spe.putString(Constants.KEY_ENCODED_EMAIL, null);
                         spe.putString(Constants.KEY_PROVIDER, null);
+                        spe.putString(Constants.KEY_USER_ID, null);
 
                         takeUserToLoginScreenOnUnAuth();
                     }

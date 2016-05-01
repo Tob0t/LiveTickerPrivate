@@ -11,7 +11,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -33,7 +32,6 @@ import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameEvent;
 import osfma.mcm.fhooe.at.livetickerprivate.model.GameSet;
-import osfma.mcm.fhooe.at.livetickerprivate.model.User;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.MainActivity;
 import osfma.mcm.fhooe.at.livetickerprivate.ui.game.adapter.GameDetailListAdapter;
 import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
@@ -47,23 +45,20 @@ public class GameWatchFragment extends Fragment{
     private Firebase mActiveGameRef;
     private Firebase mActiveGameSetsRef;
     private Firebase mGamesEventsRef;
-    private Firebase mUserRef;
+    private Firebase mUserIsTypingRef;
     private GameDetailListAdapter mGameDetailListAdapter;
-    private ValueEventListener mActiveGameRefListener, mUserRefListener;
+    private ValueEventListener mActiveGameRefListener;
     private ChildEventListener mActiveGameSetsRefListener;
     private ListView mGameDetailListView;
     private TextView mTeam1Name, mTeam1Points, mTeam2Name, mTeam2Points;
     private ArrayList<TextView> mTeam1PointsSets, mTeam2PointsSets;
     private TextView mTeam1NameTable;
     private TextView mTeam2NameTable;
-    private MenuItem mMenuItemManage;
     private ArrayList<TableRow> mSetTableRows;
-    private TableRow mHeadline;
-    private User mUser;
     private boolean mCurrentUserIsOwner = false;
     private Constants.GameType mGameType;
     private String mGameId;
-    private String mEncodedEmail;
+    private String mUserId;
 
     @Nullable
     @Override
@@ -75,8 +70,8 @@ public class GameWatchFragment extends Fragment{
         mGameId = intent.getStringExtra(Constants.KEY_LIST_ID);
         mGameType = (Constants.GameType) intent.getSerializableExtra(Constants.KEY_GAME_TYPE);
 
-        // Get email from Activity
-        mEncodedEmail = ((GameDetailActivity)getActivity()).getmEncodedEmail();
+        // Get userId from Activity
+        mUserId = ((GameDetailActivity)getActivity()).getmUserId();
         /**
          * Create Firebase references
          */
@@ -85,7 +80,8 @@ public class GameWatchFragment extends Fragment{
         mActiveGameRef = new Firebase(gameType).child(mGameId);
         mGamesEventsRef = new Firebase(Constants.FIREBASE_URL_GAMES_EVENTS).child(mGameId);
         mActiveGameSetsRef = new Firebase(gameType).child(mGameId).child(Constants.FIREBASE_LOCATION_GAMES_GAMESETS);
-        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
+        mUserIsTypingRef = new Firebase(Constants.FIREBASE_URL_USER_TYPING_INDICATOR).child(mUserId);
+        mUserIsTypingRef.onDisconnect().removeValue();
 
         //mActiveGameRef.keepSynced(true);
 
@@ -116,10 +112,8 @@ public class GameWatchFragment extends Fragment{
                     mTeam2NameTable.setText(game.getTeam2());
 
                     /* Check if the current user is owner */
-                    mCurrentUserIsOwner = Helper.checkIfOwner(game, mEncodedEmail);
-                    if (mMenuItemManage != null) {
-                        mMenuItemManage.setVisible(mCurrentUserIsOwner);
-                    }
+                    mCurrentUserIsOwner = Helper.checkIfOwner(game, mUserId);
+
                 } else{
                     Helper.showToast(getActivity(), rootView.getResources().getString(R.string.game_deleted));
                     Intent intent = new Intent(getActivity(), MainActivity.class);
@@ -160,22 +154,6 @@ public class GameWatchFragment extends Fragment{
             @Override
             public void onCancelled(FirebaseError firebaseError) {
 
-            }
-        });
-
-        mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot != null) {
-                    mUser = dataSnapshot.getValue(User.class);
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Log.e(LOG_TAG, getString(R.string.log_error_the_read_failed)
-                        + firebaseError.getMessage());
             }
         });
 
@@ -256,8 +234,12 @@ public class GameWatchFragment extends Fragment{
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() <= 0) {
                     buttonSendMessage.setVisibility(View.INVISIBLE);
+                    // set userTypingIndicator to false
+                    mUserIsTypingRef.setValue(false);
                 } else {
                     buttonSendMessage.setVisibility(View.VISIBLE);
+                    // set userTypingIndicator to true
+                    mUserIsTypingRef.setValue(true);
                 }
             }
 
@@ -266,8 +248,6 @@ public class GameWatchFragment extends Fragment{
 
             }
         });
-
-
 
         buttonSendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,17 +264,14 @@ public class GameWatchFragment extends Fragment{
     }
 
     private void sendMessage(String message, View view) {
-        mGamesEventsRef.push().setValue(new GameEvent(message,mUser.getEmail(), Constants.ItemType.CHAT));
+        mGamesEventsRef.push().setValue(new GameEvent(message, Constants.ItemType.CHAT, mUserId));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         mGameDetailListAdapter.cleanup();
         mActiveGameRef.removeEventListener(mActiveGameRefListener);
         mActiveGameSetsRef.removeEventListener(mActiveGameSetsRefListener);
-        mUserRef.removeEventListener(mUserRefListener);
-
     }
 }

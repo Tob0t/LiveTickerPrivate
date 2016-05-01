@@ -143,7 +143,7 @@ public class GameCreateActivity extends BaseActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Game newGame = new Game(sportType,team1,team2,dateAndTime,Constants.SET_COUNT_DEFAULT,mEncodedEmail);
+        Game newGame = new Game(sportType,team1,team2,dateAndTime,Constants.SET_COUNT_DEFAULT,mUserId);
 
         // Get the reference to the root node in Firebase
         Firebase ref = new Firebase(Constants.FIREBASE_URL);

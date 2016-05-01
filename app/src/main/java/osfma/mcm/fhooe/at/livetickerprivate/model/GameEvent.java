@@ -15,29 +15,30 @@ import osfma.mcm.fhooe.at.livetickerprivate.utils.Constants;
 public class GameEvent {
     private String message;
     private String info;
-    private String author;
     private Constants.ItemType type;
     private HashMap<String, Object> timestampSent;
+    private String userId;
 
     public GameEvent() {}
 
-    public GameEvent(String message, String author, Constants.ItemType type) {
+    public GameEvent(String message, Constants.ItemType type, String userId) {
         this.message = message;
-        this.author = author;
         this.type = type;
+        this.info = "";
         HashMap<String, Object> timestampSentObj = new HashMap<String, Object>();
         timestampSentObj.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
         this.timestampSent = timestampSentObj;
+        this.userId = userId;
     }
 
-    public GameEvent(String message, String info, String author, Constants.ItemType type) {
+    public GameEvent(String message, String info, Constants.ItemType type, String userId) {
         this.message = message;
         this.info = info;
-        this.author = author;
         this.type = type;
         HashMap<String, Object> timestampSentObj = new HashMap<String, Object>();
         timestampSentObj.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
         this.timestampSent = timestampSentObj;
+        this.userId = userId;
     }
 
     public String getMessage() {
@@ -48,8 +49,8 @@ public class GameEvent {
         return info;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getUserId() {
+        return userId;
     }
 
     public Constants.ItemType getType() {

@@ -11,6 +11,16 @@
     android:paddingLeft="@dimen/margin_small"
     android:paddingStart="@dimen/margin_small">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/pic_height"
+        android:id="@+id/bgImage"
+        android:src="@drawable/beachvolleyball"
+        android:alpha="0.4"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp" />
+
     <TextView
         android:id="@+id/textView_game"
         style="@style/ListItemText"

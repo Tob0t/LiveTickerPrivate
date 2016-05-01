@@ -56,14 +56,14 @@ public class MainActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initial Value
+        // Initial Values
         mGameType = Constants.GameType.PUBLIC;
         setTitle(this.getString(R.string.title_public_games));
 
         /**
          * Create Firebase references
          */
-        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
+        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mUserId);
 
         initializeScreen();
 
@@ -140,15 +140,12 @@ public class MainActivity extends BaseActivity
         // update all fragments if the GameType is changed
         for(Fragment f :getSupportFragmentManager().getFragments()){
             if(f instanceof GamesListFragment){
-                ((GamesListFragment) f).updateGameType(mGameType, mEncodedEmail);
+                ((GamesListFragment) f).updateGameType(mGameType, mUserId);
             }
         }
     }
     public Constants.GameType getGameType(){
         return mGameType;
-    }
-    public String getmEncodedEmail() {
-        return mEncodedEmail;
     }
 
     /**
@@ -180,8 +177,7 @@ public class MainActivity extends BaseActivity
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
-
-
+            // Load ProfileImage and email when drawer is opened
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 TextView accountName = (TextView) findViewById(R.id.textView_account_name);
@@ -218,7 +214,7 @@ public class MainActivity extends BaseActivity
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_RUNNING));
         tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_FUTURE));
-        tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_PAST));
+        tabLayout.addTab(tabLayout.newTab().setText(Constants.GAMES_FINISHED));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         mViewPager = (ViewPager) findViewById(R.id.pager);

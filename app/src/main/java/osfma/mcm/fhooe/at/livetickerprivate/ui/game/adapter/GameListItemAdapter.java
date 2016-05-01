@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
@@ -39,6 +40,7 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
 
     @Override
     protected void populateView(View view, Game game, int i) {
+        ImageView bgImage = (ImageView) view.findViewById(R.id.bgImage);
         TextView textViewGame = (TextView) view.findViewById(R.id.textView_game);
         TextView textViewStateConcrete = (TextView) view.findViewById(R.id.textView_state_concrete);
         TextView textViewDate = (TextView) view.findViewById(R.id.textView_date);
@@ -49,8 +51,23 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
 
         textViewDate.setText(Helper.DATE_FORMATTER.format(game.getDateAndTime()));
         textViewTime.setText(Helper.TIME_FORMATTER.format(game.getDateAndTime()));
-        setOwnerName(textViewOwner, game.getOwner());
+        setOwnerName(textViewOwner, game.getUserId());
         textViewSportType.setText(game.getSportType());
+
+        // Set Background image depending on sportType
+        switch (game.getSportType()){
+            case "Beachvolleyball":
+                bgImage.setImageResource(R.drawable.beachvolleyball);
+                break;
+            case "Volleyball":
+                bgImage.setImageResource(R.drawable.volleyball);
+                break;
+            case "Badminton":
+                bgImage.setImageResource(R.drawable.badminton);
+                break;
+            default:
+                bgImage.setImageResource(R.drawable.default_sportype);
+        }
 
         // Format SetView
         StringBuffer s = new StringBuffer();
@@ -81,8 +98,9 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
         textViewGame.setText(game.getTeam1() + " vs. " + game.getTeam2());
     }
 
-    private void setOwnerName(final TextView textViewOwner, String authorEmail) {
-        Firebase userRef = new Firebase(Constants.FIREBASE_URL_USERS).child(authorEmail);
+    // Set displayName
+    private void setOwnerName(final TextView textViewOwner, String userId) {
+        Firebase userRef = new Firebase(Constants.FIREBASE_URL_USERS).child(userId);
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override

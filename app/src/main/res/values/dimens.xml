@@ -23,6 +23,7 @@
     <dimen name="activity_horizontal_margin_land">64dp</dimen>
 
     <dimen name="lists_row_height">90dp</dimen>
+    <dimen name="pic_height">70dp</dimen>
     <dimen name="empty_footer_height">80dp</dimen>
     <dimen name="logo_image_size">100dp</dimen>
 

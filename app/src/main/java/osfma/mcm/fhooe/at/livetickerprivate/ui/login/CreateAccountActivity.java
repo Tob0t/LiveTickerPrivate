@@ -100,13 +100,17 @@ public class CreateAccountActivity extends BaseActivity {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(CreateAccountActivity.this);
                 SharedPreferences.Editor spe = sp.edit();
 
+                // get userId from result
+                String userId = (String) result.get("uid");
+
                 /**
                  * Save name and email to sharedPreferences to create User database record
                  * when the registered user will sign in for the first time
                  */
                 spe.putString(Constants.KEY_SIGNUP_EMAIL, mUserEmail).apply();
+                spe.putString(Constants.KEY_USER_ID, userId).apply();
 
-                createUserInFirebaseHelper();
+                createUserInFirebaseHelper(userId);
 
                 showToast(getResources().getString(R.string.user_created_successfully));
 
@@ -134,10 +138,11 @@ public class CreateAccountActivity extends BaseActivity {
 
     /**
      * Creates a new user in Firebase from the Java POJO
+     * @param userId
      */
-    private void createUserInFirebaseHelper() {
+    private void createUserInFirebaseHelper(String userId) {
         final String encodedEmail = Helper.encodeEmail(mUserEmail);
-        final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(encodedEmail);
+        final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(userId);
 
         userLocation.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

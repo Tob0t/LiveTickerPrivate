@@ -245,7 +245,7 @@ public class LoginActivity extends BaseActivity {
 
                 /* Save provider name and encodedEmail for later use and start MainActivity */
                 mSharedPrefEditor.putString(Constants.KEY_PROVIDER, authData.getProvider()).apply();
-                mSharedPrefEditor.putString(Constants.KEY_ENCODED_EMAIL, mEncodedEmail).apply();
+                mSharedPrefEditor.putString(Constants.KEY_USER_ID, mUserId).apply();
 
                 /* Go to main activity */
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -289,11 +289,7 @@ public class LoginActivity extends BaseActivity {
      */
     private void setAuthenticatedUserPasswordProvider(AuthData authData) {
         final String unprocessedEmail = authData.getProviderData().get(Constants.FIREBASE_PROPERTY_EMAIL).toString().toLowerCase();
-        /**
-         * Encode user email replacing "." with ","
-         * to be able to use it as a Firebase db key
-         */
-        mEncodedEmail = Helper.encodeEmail(unprocessedEmail);
+
     }
 
     /**
@@ -309,6 +305,7 @@ public class LoginActivity extends BaseActivity {
  */
 
         String unprocessedEmail;
+
         if (mGoogleApiClient.isConnected()) {
             unprocessedEmail = mGoogleAccount.getEmail().toLowerCase();
             mSharedPrefEditor.putString(Constants.KEY_GOOGLE_EMAIL, unprocessedEmail).apply();
@@ -324,14 +321,17 @@ public class LoginActivity extends BaseActivity {
          * Encode user email replacing "." with "," to be able to use it
          * as a Firebase db key
          */
-        mEncodedEmail = Helper.encodeEmail(unprocessedEmail);
+        final String mEncodedEmail = Helper.encodeEmail(unprocessedEmail);
 
-            /* Get username from authData */
+        /* Get username from authData */
         final String userName = (String) authData.getProviderData().get(Constants.PROVIDER_DATA_DISPLAY_NAME);
         final String profileImageUrl = (String) authData.getProviderData().get(Constants.PROVIDER_DATA_PROFILE_IMAGE_URL);
 
-            /* If no user exists, make a user */
-        final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
+        /* Get userId */
+        mUserId = authData.getUid();
+
+        /* If no user exists, make a user */
+        final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(mUserId);
         userLocation.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

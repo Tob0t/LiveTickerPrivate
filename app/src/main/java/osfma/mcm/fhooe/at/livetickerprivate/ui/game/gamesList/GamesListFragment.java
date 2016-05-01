@@ -32,9 +32,9 @@ public class GamesListFragment extends Fragment {
     private static final String LOG_TAG = GamesListFragment.class.getSimpleName();
     private ListView mGamesView;
     private GameListItemAdapter mGameListItemAdapter;
-    private Firebase mGamesListRef;
     private Constants.GameType mGameType;
     private String mGameState;
+    private String mUserId;
 
     @Nullable
     @Override
@@ -45,10 +45,10 @@ public class GamesListFragment extends Fragment {
         Bundle bundle = this.getArguments();
         mGameState = bundle.getString(Constants.GAME_STATE);
         mGameType = ((MainActivity) getActivity()).getGameType();
-        String encodedEmail = ((MainActivity)getActivity()).getmEncodedEmail();
+        mUserId = Helper.getUserId();
 
         Query gamesListRefQuery = createQuery();
-        setupGameListItemAdapter(gamesListRefQuery, encodedEmail);
+        setupGameListItemAdapter(gamesListRefQuery, mUserId);
 
         mGamesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -72,6 +72,7 @@ public class GamesListFragment extends Fragment {
         return rootView;
     }
 
+    // query to decide to search for public or private games
     private Query createQuery() {
         String gameTypeUrl ="";
         if (mGameType == Constants.GameType.PUBLIC) {
@@ -82,7 +83,8 @@ public class GamesListFragment extends Fragment {
         return new Firebase(gameTypeUrl).orderByChild("dateAndTime");
     }
 
-    private void setupGameListItemAdapter(Query gamesListRefQuery, String encodedEmail) {
+    // setup adapter and add some filters
+    private void setupGameListItemAdapter(Query gamesListRefQuery, String userId) {
         Map<Method, Object> filterMap = new HashMap<Method, Object>();
 
         switch (mGameState) {
@@ -93,13 +95,14 @@ public class GamesListFragment extends Fragment {
             case Constants.GAMES_FUTURE:
                 filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_STARTED, false);
                 break;
-            case Constants.GAMES_PAST:
+            case Constants.GAMES_FINISHED:
                 filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_FINISHED, true);
                 break;
         }
 
+        // if the mode is private add a filter to only show private games
         if(mGameType == Constants.GameType.PRIVATE){
-            filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_OWNER, encodedEmail);
+            filterMap = Helper.addFilter(filterMap, Game.class, Constants.METHOD_GAME_OWNER, userId);
         }
 
         mGameListItemAdapter = new GameListItemAdapter(getActivity(), Game.class,
@@ -110,10 +113,10 @@ public class GamesListFragment extends Fragment {
 
     }
 
-    public void updateGameType(Constants.GameType gameType, String encodedEmail) {
+    public void updateGameType(Constants.GameType gameType, String userId) {
         mGameType = gameType;
         Query gamesListRefQuery = createQuery();
-        setupGameListItemAdapter(gamesListRefQuery, encodedEmail);
+        setupGameListItemAdapter(gamesListRefQuery, userId);
     }
 
     @Override

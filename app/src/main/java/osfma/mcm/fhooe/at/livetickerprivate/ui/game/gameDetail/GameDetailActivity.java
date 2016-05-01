@@ -59,7 +59,7 @@ public class GameDetailActivity extends BaseActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Game game = dataSnapshot.getValue(Game.class);
                     if(game != null) {
-                        mGameOwner = game.getOwner();
+                        mGameOwner = game.getUserId();
                         setupLayout();
                         showMenuItemsIfOwner();
                     }
@@ -83,12 +83,13 @@ public class GameDetailActivity extends BaseActivity {
 
     }
 
+    // show only menu items is the user is owner of the game
     private void showMenuItemsIfOwner() {
         if(mOptionsMenu != null) {
             MenuItem mnuEdit = mOptionsMenu.findItem(R.id.action_edit_game);
             MenuItem mnuDelete = mOptionsMenu.findItem(R.id.action_delete_game);
 
-            if (mEncodedEmail.equals(mGameOwner)) {
+            if (mUserId.equals(mGameOwner)) {
                 mnuEdit.setVisible(true);
                 mnuDelete.setVisible(true);
             }
@@ -100,7 +101,7 @@ public class GameDetailActivity extends BaseActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Watch"));
         tabLayout.setVisibility(View.GONE);
-        if(mEncodedEmail.equals(mGameOwner)) {
+        if(mUserId.equals(mGameOwner)) {
             tabLayout.addTab(tabLayout.newTab().setText("Manage"));
             tabLayout.setVisibility(View.VISIBLE);
         }
@@ -177,7 +178,7 @@ public class GameDetailActivity extends BaseActivity {
         return true;
     }
 
-    public String getmEncodedEmail() {
-        return mEncodedEmail;
+    public String getmUserId() {
+        return mUserId;
     }
 }

@@ -45,11 +45,11 @@ public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
 
         switch (gameEvent.getType()) {
             case SCORE:
-                author.setText(gameEvent.getAuthor());
+                setOwnerName(author, gameEvent.getUserId());
                 showScoreEvent(view, gameEvent);
                 break;
             case CHAT:
-                setAuthorName(author, gameEvent.getAuthor());
+                setOwnerName(author, gameEvent.getUserId());
                 showChatEvent(view, gameEvent);
                 break;
             case INFO:
@@ -57,15 +57,15 @@ public class GameDetailListAdapter extends FirebaseListAdapter<GameEvent> {
         }
     }
 
-    private void setAuthorName(final TextView textViewAuthor, String authorEmail) {
-        Firebase userRef = new Firebase(Constants.FIREBASE_URL_USERS).child(authorEmail);
+    private void setOwnerName(final TextView textViewOwner, String userId) {
+        Firebase userRef = new Firebase(Constants.FIREBASE_URL_USERS).child(userId);
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
-                    textViewAuthor.setText(user.getName());
+                    textViewOwner.setText(user.getName());
                 }
             }
 
