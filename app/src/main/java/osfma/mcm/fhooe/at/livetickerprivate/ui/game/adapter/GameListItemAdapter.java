@@ -95,7 +95,7 @@ public class GameListItemAdapter extends FirebaseListAdapter<Game> {
         }
         textViewStateConcrete.setText(concreteState);
 
-        textViewGame.setText(game.getTeam1() + " vs. " + game.getTeam2());
+        textViewGame.setText(game.getTeam1() + " vs " + game.getTeam2());
     }
 
     // Set displayName

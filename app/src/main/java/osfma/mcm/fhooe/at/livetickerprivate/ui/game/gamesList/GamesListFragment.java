@@ -45,7 +45,8 @@ public class GamesListFragment extends Fragment {
         Bundle bundle = this.getArguments();
         mGameState = bundle.getString(Constants.GAME_STATE);
         mGameType = ((MainActivity) getActivity()).getGameType();
-        mUserId = Helper.getUserId();
+        //mUserId = Helper.getUserId();
+        mUserId = ((MainActivity) getActivity()).getUserId();
 
         Query gamesListRefQuery = createQuery();
         setupGameListItemAdapter(gamesListRefQuery, mUserId);

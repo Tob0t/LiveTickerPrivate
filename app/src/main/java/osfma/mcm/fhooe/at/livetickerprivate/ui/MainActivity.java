@@ -148,6 +148,10 @@ public class MainActivity extends BaseActivity
         return mGameType;
     }
 
+    public String getUserId(){
+        return mUserId;
+    }
+
     /**
      * Cleanup when the activity is destroyed.
      */

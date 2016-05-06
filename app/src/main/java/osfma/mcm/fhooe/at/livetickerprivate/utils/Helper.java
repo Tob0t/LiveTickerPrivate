@@ -1,11 +1,14 @@
 package osfma.mcm.fhooe.at.livetickerprivate.utils;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -21,6 +24,7 @@ import java.util.Map;
 import osfma.mcm.fhooe.at.livetickerprivate.R;
 import osfma.mcm.fhooe.at.livetickerprivate.model.Game;
 import osfma.mcm.fhooe.at.livetickerprivate.model.User;
+import osfma.mcm.fhooe.at.livetickerprivate.ui.BaseActivity;
 
 /**
  * Created by Tob0t on 24.02.2016.
